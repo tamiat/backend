@@ -35,7 +35,7 @@ func main() {
 	data = append(data, apiTest{ID: "0", Title: "Hello World", Details: "dummy details"})
 	data = append(data, apiTest{ID: "1", Title: "Hello World2", Details: "dummy details2"})
 
-	r.HandleFunc("/apiTest/{id}", getData).Methods("GET")
+	r.HandleFunc("/content/{id}", getData).Methods("GET")
 	fmt.Printf("Starting server at port 8000\n")
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
