@@ -21,7 +21,7 @@ func NewConfig(db *sql.DB) *AppConfig {
 }
 
 func ConnectDB() *sql.DB {
-	portNum, _ := strconv.Atoi(os.Getenv("PORT"))
+	portNum, _ := strconv.Atoi(os.Getenv("PORTDB"))
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		os.Getenv("HOST"),portNum , os.Getenv("USR"), os.Getenv("PASS"), os.Getenv("DBNAME"))

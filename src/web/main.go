@@ -9,6 +9,7 @@ import (
 	"github.com/marwangalal746/backend/src/pkg/handlers"
 	"log"
 	"net/http"
+	"os"
 )
 
 func addSomeContents(app *config.AppConfig) {
@@ -43,7 +44,7 @@ func main() {
 	}(app.DB)
 	addSomeContents(app)
 	r.HandleFunc("/content/{id}", handlers.GetContent).Methods("GET")
-	fmt.Printf("Starting server at port 8000\n")
-	log.Fatal(http.ListenAndServe(":8000", r))
+	fmt.Printf("Starting server at port %s\n", os.Getenv("PORT"))
+	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), r))
 
 }
