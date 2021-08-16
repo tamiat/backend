@@ -12,10 +12,13 @@ import (
 	"os"
 )
 
+//This function is used to add some content to db to test the api
 func addSomeContents(app *config.AppConfig) {
+	//query of insertion
 	insertStatement := `INSERT INTO contents (title, details)VALUES ('first content', 'blablablablabla')
 						,('second content', 'jajajajajaja');`
 	var err error
+	//executing the query
 	_, err = app.DB.Exec(insertStatement)
 	if err != nil {
 		panic(err)
@@ -42,9 +45,15 @@ func main() {
 
 		}
 	}(app.DB)
-	addSomeContents(app)
-	r.HandleFunc("/content/{id}", handlers.GetContent).Methods("GET")
+	//addSomeContents(app)
+	//if id=5 the url will be example.com/api/v0/content?id=5
+	r.Host("localhost"+ os.Getenv("PORT")).Path("/api/v0/content").Queries("id","{id}").
+		HandlerFunc(handlers.GetContent).Name("GetContent")
+	r.HandleFunc("/objects", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello! Parameters: %v", r.URL.Query())
+	})
 	fmt.Printf("Starting server at port %s\n", os.Getenv("PORT"))
 	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), r))
+
 
 }
