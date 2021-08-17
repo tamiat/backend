@@ -6,8 +6,8 @@ import (
 
 type ContentService interface {
 	//TODO 3
-	GetAllCustomers()([]content.Content,error)
-	GetCustomer(string) (*content.Content,error)
+	GetAllContents()([]content.Content,error)
+	GetContent(string) (*content.Content,error)
 }
 
 type DefaultContentService struct{
@@ -20,6 +20,6 @@ func (s DefaultContentService) GetAllContents()([]content.Content,error){
 func (s DefaultContentService) GetContent(id string)(*content.Content,error){
 	return s.repo.ById(id)
 }
-func NewCustomerService(repository content.ContentRepository) DefaultContentService{
+func NewContentService(repository content.ContentRepository) DefaultContentService{
 	return DefaultContentService{repo: repository}
 }
