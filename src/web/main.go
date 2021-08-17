@@ -54,7 +54,10 @@ func main() {
 
 	//if id=5 the url will be example.com/api/v0/content?id=5
 	r.Host("localhost"+os.Getenv("PORT")).Path("/api/v0/content").Queries("id", "{id}").
-		HandlerFunc(handlers.GetContent).Name("GetContent")
+		HandlerFunc(handlers.GetContent).Name("GetContent").Methods("GET")
+
+	//if id=5 the url will be example.com/api/v0/content?id=5
+	r.HandleFunc("/api/v0/content", handlers.PostContent).Methods("POST")
 
 	fmt.Printf("Starting server at port %s\n", os.Getenv("PORT"))
 

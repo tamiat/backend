@@ -112,3 +112,19 @@ func getRangeOfContents(ids []string) []content.Content {
 	}
 	return res
 }
+
+func PostContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var newContent content.Content
+	err := json.NewDecoder(r.Body).Decode(&newContent)
+	if err != nil {
+		panic(err)
+	}
+	query := `INSERT INTO contents (title, details) VALUES ($1, $2)`
+	res, err := app.DB.Exec(query, newContent.Title, newContent.Details)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(res)
+}
