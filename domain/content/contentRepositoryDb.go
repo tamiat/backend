@@ -15,7 +15,7 @@ type ContentRepositoryDb struct {
 
 //TODO 2
 func (r ContentRepositoryDb) FindAll() ([]Content, error) {
-	findAllSQL := "SELECT * FROM contents"
+	findAllSQL := "SELECT id, title, details FROM contents"
 	rows, err := r.db.Query(findAllSQL)
 	if err != nil {
 		log.Println("error while querying " + err.Error())
@@ -34,7 +34,7 @@ func (r ContentRepositoryDb) FindAll() ([]Content, error) {
 	return contents, nil
 }
 func (d ContentRepositoryDb) ById(id string) (*Content, error) {
-	contentSQL := "SELECT * FROM contents WHERE id = $1"
+	contentSQL := "SELECT id, title, details FROM contents WHERE id = $1"
 	row := d.db.QueryRow(contentSQL, id)
 	var c Content
 	err := row.Scan(&c.Id, &c.Title, &c.Details)
