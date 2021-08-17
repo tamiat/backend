@@ -70,7 +70,7 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 
 //utility function to get a specific content frim db
 func getOneContent(id string) []content.Content {
-	query := `SELECT * FROM contents WHERE id=$1`
+	query := `SELECT id, title, details FROM contents WHERE id=$1`
 	row := app.DB.QueryRow(query, id)
 	var item content.Content
 	switch err := row.Scan(&item.ID, &item.Title, &item.Details); err {
@@ -79,6 +79,7 @@ func getOneContent(id string) []content.Content {
 	case nil:
 		fmt.Println(item.ID, item.Title, item.Details)
 	default:
+		fmt.Println(item.ID)
 		panic(err)
 	}
 	var res []content.Content
@@ -93,7 +94,7 @@ func getRangeOfContents(ids []string) []content.Content {
 	var res []content.Content
 	from, _ := strconv.Atoi(ids[0])
 	to, _ := strconv.Atoi(ids[1])
-	query := `SELECT * FROM contents WHERE id>=$1 AND id<=$2`
+	query := `SELECT id, title, details FROM contents WHERE id>=$1 AND id<=$2`
 	rows, err := app.DB.Query(query, from, to)
 	if err != nil {
 		panic(err)

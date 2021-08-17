@@ -43,6 +43,8 @@ func main() {
 	//assigning a value to the instance of AppConfig which in handlers pkg
 	handlers.SetConfig(app)
 
+	addSomeContents(app)
+
 	//closing connection of db after main function finishing exec
 	defer func(DB *sql.DB) {
 		err := DB.Close()
