@@ -13,7 +13,6 @@ type ContentRepositoryDb struct {
 	db *sql.DB
 }
 
-//TODO 2
 func (r ContentRepositoryDb) FindAll() ([]Content, error) {
 	findAllSQL := "SELECT id, title, details FROM contents"
 	rows, err := r.db.Query(findAllSQL)

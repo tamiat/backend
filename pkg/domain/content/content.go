@@ -1,5 +1,6 @@
 package content
 
+//content model
 type Content struct {
 	Id      int    `json:"id"`
 	Title   string `json:"title"`

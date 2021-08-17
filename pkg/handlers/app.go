@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github.com/tamiat/backend/domain/content"
-	"github.com/tamiat/backend/service"
 	"github.com/gorilla/mux"
+	"github.com/tamiat/backend/pkg/domain/content"
+	"github.com/tamiat/backend/pkg/service"
 	"log"
 	"net/http"
 )

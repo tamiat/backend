@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/tamiat/backend/service"
 	"github.com/gorilla/mux"
+	"github.com/tamiat/backend/pkg/service"
 	"log"
 	"net/http"
 )
