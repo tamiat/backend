@@ -14,25 +14,25 @@ type AppConfig struct {
 	DB *sql.DB
 }
 
+// NewConfig func to create a new instance of AppConfig struct
 func NewConfig(db *sql.DB) *AppConfig {
 	return &AppConfig{
 		DB: db,
 	}
 }
 
+// ConnectDB func to connect with db
 func ConnectDB() *sql.DB {
 	portNum, _ := strconv.Atoi(os.Getenv("PORTDB"))
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		os.Getenv("HOST"),portNum , os.Getenv("USR"), os.Getenv("PASS"), os.Getenv("DBNAME"))
+		os.Getenv("HOST"), portNum, os.Getenv("USR"), os.Getenv("PASS"), os.Getenv("DBNAME"))
 	var db *sql.DB
 	var err error
 	db, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
-	//defer db.Close()
-
 	err = db.Ping()
 	if err != nil {
 		panic(err)

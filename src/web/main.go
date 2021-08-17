@@ -35,25 +35,27 @@ func init() {
 func main() {
 
 	r := mux.NewRouter()
+
+	//connecting to db and assign a value to the instance of AppConfig which in config pkg
 	var app *config.AppConfig
 	db := config.ConnectDB()
 	app = config.NewConfig(db)
+	//assigning a value to the instance of AppConfig which in handlers pkg
 	handlers.SetConfig(app)
+
+	//closing connection of db after main function finishing exec
 	defer func(DB *sql.DB) {
 		err := DB.Close()
 		if err != nil {
-
 		}
 	}(app.DB)
-	//addSomeContents(app)
-	//if id=5 the url will be example.com/api/v0/content?id=5
-	r.Host("localhost"+ os.Getenv("PORT")).Path("/api/v0/content").Queries("id","{id}").
-		HandlerFunc(handlers.GetContent).Name("GetContent")
-	r.HandleFunc("/objects", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello! Parameters: %v", r.URL.Query())
-	})
-	fmt.Printf("Starting server at port %s\n", os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), r))
 
+	//if id=5 the url will be example.com/api/v0/content?id=5
+	r.Host("localhost"+os.Getenv("PORT")).Path("/api/v0/content").Queries("id", "{id}").
+		HandlerFunc(handlers.GetContent).Name("GetContent")
+
+	fmt.Printf("Starting server at port %s\n", os.Getenv("PORT"))
+
+	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), r))
 
 }

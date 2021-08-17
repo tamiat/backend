@@ -13,17 +13,25 @@ import (
 	"strings"
 )
 
+//declare an instance from AppConfig struct to make db accessible in this package
 var app *config.AppConfig
 
 func SetConfig(a *config.AppConfig) {
 	app = a
 }
 
+//this func is used for extracting the numbers which passes as id values
+//it takes the value which client passes it as an id in the request (the value is a string) and it returns an array contain the values after parsing
+//there is to cases:
+//1- if the user wants to get a specific content so this function return an array with size 1
+//if the string in case 1 it will return an array which contain the string itself
+//2- if the user wants to get a range of contents
+//if in case2, it will return an array with size 2 (first element is the start of the rang and second is the end)
 func parseNums(str string) []string {
 	var params []string
-	if str[0] >= '0' && str[0] <= '9' {
+	if str[0] >= '0' && str[0] <= '9' { //case 1
 		params = append(params, str)
-	} else {
+	} else { //case 2
 		ind := strings.IndexByte(str, ':')
 		params = append(params, str[1:ind])
 		params = append(params, str[ind+1:len(str)-1])
@@ -31,16 +39,19 @@ func parseNums(str string) []string {
 	return params
 }
 
+// GetContent endpoint to get contents
 func GetContent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
+	//regular expression to check if the string has numbers only	example: 1234
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(params["id"]))
+	//regular expression to check if the string in the pattern of this examples ([1:2], [35:40])
 	pattern2, _ := regexp.Match(`^([)([0-9]+)[:]([0-9]+)(])$`, []byte(params["id"]))
+	//if the string can't match with any RG, the response will be 400 (badrequest)
 	if !pattern1 && !pattern2 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//fmt.Println(params["id"])
 	idValues := parseNums(params["id"])
 	var items []content.Content
 	if len(idValues) == 1 {
@@ -48,11 +59,16 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	} else {
 		items = append(items, getRangeOfContents(idValues)...)
 	}
+	if len(items) < 1 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	for i := 0; i < len(items); i++ {
 		json.NewEncoder(w).Encode(items[i])
 	}
 }
 
+//utility function to get a specific content frim db
 func getOneContent(id string) []content.Content {
 	query := `SELECT * FROM contents WHERE id=$1`
 	row := app.DB.QueryRow(query, id)
@@ -65,12 +81,14 @@ func getOneContent(id string) []content.Content {
 	default:
 		panic(err)
 	}
-	res := []content.Content{
-		item,
+	var res []content.Content
+	if item.ID != "" {
+		res = append(res, item)
 	}
 	return res
 }
 
+//utility function to get a specific range of contents
 func getRangeOfContents(ids []string) []content.Content {
 	var res []content.Content
 	from, _ := strconv.Atoi(ids[0])
