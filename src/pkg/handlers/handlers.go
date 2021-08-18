@@ -120,11 +120,28 @@ func PostContent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	query := `INSERT INTO contents (title, details) VALUES ($1, $2)`
+	query := `INSERT INTO contents (title, details) VALUES ($1, $2) RETURNING id`
 	res, err := app.DB.Exec(query, newContent.Title, newContent.Details)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+	query = `SELECT currval(pg_get_serial_sequence('contents','id'));`
+	row := app.DB.QueryRow(query)
+	var id string
+	switch err := row.Scan(&id); err {
+	case sql.ErrNoRows:
+		fmt.Println("No rows were returned!")
+	case nil:
+		type ID struct {
+			ID      string `json:"id"`
+		}
+		var IDobj ID
+		IDobj.ID=id
+		json.NewEncoder(w).Encode(IDobj)
+	default:
+		fmt.Println(id)
+		panic(err)
 	}
 	fmt.Println(res)
 }
