@@ -24,7 +24,14 @@ func (ch *ContentHandlers) getAllContents(w http.ResponseWriter, r *http.Request
 }
 func (ch *ContentHandlers) getContent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["content_id"]
+	//regular expression to check if the string has numbers only	example: 1234
+	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
+	//if the string can't match with any RG, the response will be 400 (badrequest)
+	if !pattern1 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	id := vars["id"]
 	log.Println(id)
 	content, _ := ch.service.GetContent(id)
 	w.Header().Add("Content-Type", "application/json")
@@ -71,6 +78,12 @@ func (ch *ContentHandlers) postContent(w http.ResponseWriter, r *http.Request) {
 
 func (ch *ContentHandlers) deleteContent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	//regular expression to check if the string has numbers only	example: 1234
+	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
+	if !pattern1  {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	id := vars["id"]
 	log.Println(id)
 	_ = ch.service.DeleteContent(id)
@@ -78,6 +91,13 @@ func (ch *ContentHandlers) deleteContent(w http.ResponseWriter, r *http.Request)
 }
 
 func (ch *ContentHandlers) updateContent(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	//regular expression to check if the string has numbers only	example: 1234
+	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
+	if !pattern1  {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	var newContent content.Content
 	err := json.NewDecoder(r.Body).Decode(&newContent)
 	if err != nil {
