@@ -48,6 +48,66 @@ func (d ContentRepositoryDb) ById(id string) (*Content, error) {
 	return &c, nil
 }
 
+func (d ContentRepositoryDb) FindRange(ids []string) ([]Content, error) {
+	var res []Content
+	query := `SELECT id, title, details FROM contents WHERE id>=$1 AND id<=$2`
+	rows, err := d.db.Query(query, ids[0], ids[1])
+	if err != nil {
+		panic(err)
+		return res, err
+	}
+	for rows.Next() {
+		var item Content
+		switch err := rows.Scan(&item.Id, &item.Title, &item.Details); err {
+		case sql.ErrNoRows:
+			fmt.Println("No rows were returned!")
+		case nil:
+			res = append(res, item)
+		default:
+			panic(err)
+		}
+	}
+	return res, nil
+}
+
+func (d ContentRepositoryDb) Post(newContent Content) (string, error) {
+	query := `INSERT INTO contents (title, details) VALUES ($1, $2)`
+	_, err := d.db.Exec(query, newContent.Title, newContent.Details)
+	if err != nil {
+		return "", err
+	}
+	query = `SELECT currval(pg_get_serial_sequence('contents','id'));`
+	row := d.db.QueryRow(query)
+	var id string
+	switch err := row.Scan(&id); err {
+	case sql.ErrNoRows:
+		return "", nil
+	case nil:
+		return id, nil
+	default:
+		fmt.Println(id)
+		panic(err)
+	}
+}
+
+func (d ContentRepositoryDb) DeleteById(id string) error {
+	query := `DELETE FROM contents WHERE id=$1`
+	_, err := d.db.Exec(query,id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d ContentRepositoryDb) UpdateById(id string, UpdContent Content) error {
+	query := `UPDATE contents SET title=$1, details=$2 Where id=$3`
+	_, err := d.db.Exec(query, UpdContent.Title, UpdContent.Details, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewContentRepositoryDb() ContentRepositoryDb {
 
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",
