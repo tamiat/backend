@@ -30,7 +30,7 @@
 					"response": []
 				},
 				{
-					"name": "PostContent",
+					"name": "createContent",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -51,12 +51,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8060/api/v1/content",
+							"raw": "http://localhost:8080/api/v1/content",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "8060",
+							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -72,7 +72,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/content?id=[18:30]",
+							"raw": "http://localhost:8080/api/v1/contents?id=[18:30]",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -81,7 +81,7 @@
 							"path": [
 								"api",
 								"v1",
-								"content"
+								"contents"
 							],
 							"query": [
 								{
@@ -105,7 +105,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/content?id=19",
+							"raw": "http://localhost:8080/api/v1/content?id=22",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -119,7 +119,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "19"
+									"value": "22"
 								}
 							]
 						}
@@ -132,7 +132,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/content?id=20",
+							"raw": "http://localhost:8080/api/v1/content?id=22",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -146,7 +146,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "20"
+									"value": "22"
 								}
 							]
 						}
@@ -160,7 +160,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"aaaaaasrrrrrrrrrrrrrrrrrra\",\n    \"details\": \"445465\"\n}",
+							"raw": "{\n    \"title\": \"asasdasdasdasdawrwwwwwwwwwwwwrrra\",\n    \"details\": \"445465\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -168,7 +168,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/content?id=19",
+							"raw": "http://localhost:8080/api/v1/content?id=21",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -182,34 +182,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "19"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getRangeOfContents",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/v1/contents?id=[19:30]",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"v1",
-								"contents"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "[19:30]"
+									"value": "21"
 								}
 							]
 						}
