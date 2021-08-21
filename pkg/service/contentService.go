@@ -3,9 +3,7 @@ package service
 import (
 	"github.com/tamiat/backend/pkg/domain/content"
 )
-
 type ContentService interface {
-	//TODO 3
 	GetAllContents() ([]content.Content, error)
 	GetContent(string) (*content.Content, error)
 	GetRangeOfContents([]string) ([]content.Content, error)

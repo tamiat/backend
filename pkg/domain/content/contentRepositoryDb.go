@@ -6,7 +6,6 @@ import (
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
-	"os"
 )
 
 type ContentRepositoryDb struct {
@@ -108,27 +107,6 @@ func (d ContentRepositoryDb) UpdateById(id string, UpdContent Content) error {
 	return nil
 }
 
-func NewContentRepositoryDb() ContentRepositoryDb {
-
-	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",
-		os.Getenv("HOST"),
-		os.Getenv("DBPORT"),
-		os.Getenv("DBNAME"),
-		os.Getenv("USER"),
-		os.Getenv("PASS"))
-	db, err := sql.Open("pgx", dataSourceName)
-	if err != nil {
-		log.Fatal(fmt.Sprintf("unable to conect to db"))
-		panic(err)
-	}
-	log.Println("connected to db ")
-
-	//test connection
-	err = db.Ping()
-	if err != nil {
-		log.Fatal("cannot ping db")
-		panic(err)
-	}
-	log.Println("pinged db")
+func NewContentRepositoryDb(db *sql.DB) ContentRepositoryDb {
 	return ContentRepositoryDb{db}
 }
