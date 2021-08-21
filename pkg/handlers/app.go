@@ -1,4 +1,7 @@
 package handlers
+
+//this file is used to handle all business logic
+
 import (
 	"database/sql"
 	"fmt"
@@ -9,6 +12,7 @@ import (
 	"net/http"
 	"os"
 )
+
 func Start() {
 	router := mux.NewRouter()
 	dbConnection := getDbConnetion()

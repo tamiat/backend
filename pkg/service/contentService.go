@@ -1,5 +1,5 @@
+// Package service is used as a port of the business logic, which api handlers implement
 package service
-
 import (
 	"github.com/tamiat/backend/pkg/domain/content"
 )

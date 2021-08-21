@@ -1,13 +1,13 @@
 package content
 
-//content model
+// Content  model
 type Content struct {
 	Id      int    `json:"id"`
 	Title   string `json:"title"`
 	Details string `json:"details"`
 }
 type ContentRepository interface {
-	//TODO 1
+	//TODO1
 	FindAll() ([]Content, error)
 	ById(string) (*Content,error)
 	Post(content Content) (string, error)

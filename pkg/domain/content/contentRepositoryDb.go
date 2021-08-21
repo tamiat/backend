@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// ContentRepositoryDb implements the ContentRepository interface
 type ContentRepositoryDb struct {
 	db *sql.DB
 }
