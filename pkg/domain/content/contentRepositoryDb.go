@@ -13,7 +13,7 @@ type ContentRepositoryDb struct {
 	db *sql.DB
 }
 
-func (r ContentRepositoryDb) FindAll() ([]Content, error) {
+func (r ContentRepositoryDb) ReadAll() ([]Content, error) {
 	findAllSQL := "SELECT id, title, details FROM contents"
 	rows, err := r.db.Query(findAllSQL)
 	if err != nil {
@@ -32,7 +32,7 @@ func (r ContentRepositoryDb) FindAll() ([]Content, error) {
 	}
 	return contents, nil
 }
-func (d ContentRepositoryDb) ById(id string) (*Content, error) {
+func (d ContentRepositoryDb) ReadById(id string) (*Content, error) {
 	contentSQL := "SELECT id, title, details FROM contents WHERE id = $1"
 	row := d.db.QueryRow(contentSQL, id)
 	var c Content
@@ -48,7 +48,7 @@ func (d ContentRepositoryDb) ById(id string) (*Content, error) {
 	return &c, nil
 }
 
-func (d ContentRepositoryDb) FindRange(ids []string) ([]Content, error) {
+func (d ContentRepositoryDb) ReadRange(ids []string) ([]Content, error) {
 	var res []Content
 	query := `SELECT id, title, details FROM contents WHERE id>=$1 AND id<=$2`
 	rows, err := d.db.Query(query, ids[0], ids[1])
@@ -70,7 +70,7 @@ func (d ContentRepositoryDb) FindRange(ids []string) ([]Content, error) {
 	return res, nil
 }
 
-func (d ContentRepositoryDb) Post(newContent Content) (string, error) {
+func (d ContentRepositoryDb) Create(newContent Content) (string, error) {
 	query := `INSERT INTO contents (title, details) VALUES ($1, $2)`
 	_, err := d.db.Exec(query, newContent.Title, newContent.Details)
 	if err != nil {

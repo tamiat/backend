@@ -6,10 +6,10 @@ import (
 
 type ContentService interface {
 	//TODO 3
-	GetAllContents() ([]content.Content, error)
-	GetContent(string) (*content.Content, error)
-	GetRangeOfContents([]string) ([]content.Content, error)
-	PostContent(content.Content) (string, error)
+	ReadAllContents() ([]content.Content, error)
+	ReadContent(string) (*content.Content, error)
+	ReadRangeOfContents([]string) ([]content.Content, error)
+	CreateContent(content.Content) (string, error)
 	DeleteContent(string) error
 	UpdateContent(string, content.Content) error
 }
@@ -18,17 +18,17 @@ type DefaultContentService struct {
 	repo content.ContentRepository
 }
 
-func (s DefaultContentService) GetAllContents() ([]content.Content, error) {
-	return s.repo.FindAll()
+func (s DefaultContentService) ReadAllContents() ([]content.Content, error) {
+	return s.repo.ReadAll()
 }
-func (s DefaultContentService) GetContent(id string) (*content.Content, error) {
-	return s.repo.ById(id)
+func (s DefaultContentService) ReadContent(id string) (*content.Content, error) {
+	return s.repo.ReadById(id)
 }
-func (s DefaultContentService) GetRangeOfContents(ids []string) ([]content.Content, error) {
-	return s.repo.FindRange(ids)
+func (s DefaultContentService) ReadRangeOfContents(ids []string) ([]content.Content, error) {
+	return s.repo.ReadRange(ids)
 }
-func (s DefaultContentService) PostContent(newContent content.Content) (string, error) {
-	return s.repo.Post(newContent)
+func (s DefaultContentService) CreateContent(newContent content.Content) (string, error) {
+	return s.repo.Create(newContent)
 }
 func (s DefaultContentService) DeleteContent(id string) error {
 	return s.repo.DeleteById(id)

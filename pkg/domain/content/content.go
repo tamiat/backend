@@ -8,10 +8,10 @@ type Content struct {
 }
 type ContentRepository interface {
 	//TODO 1
-	FindAll() ([]Content, error)
-	ById(string) (*Content,error)
-	Post(content Content) (string, error)
-	FindRange([]string) ([]Content, error)
+	ReadAll() ([]Content, error)
+	ReadById(string) (*Content,error)
+	Create(content Content) (string, error)
+	ReadRange([]string) ([]Content, error)
 	DeleteById(string) error
 	UpdateById(string, Content) error
 }

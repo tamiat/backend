@@ -11,17 +11,17 @@ import (
 func Start() {
 	router := mux.NewRouter()
 	ch := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb())}
-	router.HandleFunc("/api/v1/contents", ch.getAllContents).Methods(http.MethodGet)
-	//get a content by id
+	router.HandleFunc("/api/v1/contents", ch.readAllContents).Methods(http.MethodGet)
+	//read a content by id
 	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.getContent).Methods(http.MethodGet)
+		HandlerFunc(ch.readContent).Methods(http.MethodGet)
 
-	//get range of contents
+	//read range of contents
 	router.Path("/api/v1/contents").Queries("id", "{id}").
-		HandlerFunc(ch.getRangeOfContents).Methods(http.MethodGet)
+		HandlerFunc(ch.readRangeOfContents).Methods(http.MethodGet)
 
 	//post a content
-	router.HandleFunc("/api/v1/content", ch.postContent).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/content", ch.createContent).Methods(http.MethodPost)
 
 	//
 	router.Path("/api/v1/content").Queries("id", "{id}").
