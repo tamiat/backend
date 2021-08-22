@@ -2,6 +2,7 @@
 // we use a file for each domain object, here is the content handler
 //which is responsible for crud operations of content object
 package handlers
+
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -25,6 +26,7 @@ func (ch *ContentHandlers) readAllContents(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(contents)
 }
 func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	//regular expression to check if the string has numbers only	example: 1234
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
@@ -35,8 +37,21 @@ func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
 	}
 	id := vars["id"]
 	log.Println(id)
-	content, _ := ch.service.ReadContent(id)
-	w.Header().Add("Content-Type", "application/json")
+	content, err := ch.service.ReadContent(id)
+	if err != nil {
+		var res response
+		if err.Error() == "content not found" {
+			res = response{Message: "This id is not found", Status: "404"}
+			w.WriteHeader(http.StatusNotFound)
+
+		} else {
+			res = response{Message: err.Error(), Status: "503"}
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}
+		json.NewEncoder(w).Encode(res)
+		return
+
+	}
 	json.NewEncoder(w).Encode(content)
 }
 
@@ -82,7 +97,7 @@ func (ch *ContentHandlers) deleteContent(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	//regular expression to check if the string has numbers only	example: 1234
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
-	if !pattern1  {
+	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -96,7 +111,7 @@ func (ch *ContentHandlers) updateContent(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	//regular expression to check if the string has numbers only	example: 1234
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
-	if !pattern1  {
+	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

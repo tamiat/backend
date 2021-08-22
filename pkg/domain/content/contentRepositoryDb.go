@@ -42,7 +42,7 @@ func (d ContentRepositoryDb) ReadById(id string) (*Content, error) {
 			return nil, errors.New("content not found")
 		} else {
 			log.Println("error while querying in repoDB" + err.Error())
-			return nil, errors.New("unexpected database error")
+			return nil, errors.New("Unexpected database error")
 		}
 	}
 	return &c, nil
