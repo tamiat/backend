@@ -1,5 +1,7 @@
+// Package handlers, This package is used to implement the rest API operations
+// we use a file for each domain object, here is the content handler
+//which is responsible for crud operations of content object
 package handlers
-
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"

@@ -1,11 +1,9 @@
+// Package service is used as a port of the business logic, which api handlers implement
 package service
-
 import (
 	"github.com/tamiat/backend/pkg/domain/content"
 )
-
-type ContentService interface {
-	//TODO 3
+type ContentService interface {	
 	ReadAllContents() ([]content.Content, error)
 	ReadContent(string) (*content.Content, error)
 	ReadRangeOfContents([]string) ([]content.Content, error)
