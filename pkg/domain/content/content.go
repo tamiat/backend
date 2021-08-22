@@ -7,11 +7,12 @@ type Content struct {
 	Details string `json:"details"`
 }
 type ContentRepository interface {
-	//TODO1
-	FindAll() ([]Content, error)
-	ById(string) (*Content,error)
-	Post(content Content) (string, error)
-	FindRange([]string) ([]Content, error)
+
+	//TODO 1
+	ReadAll() ([]Content, error)
+	ReadById(string) (*Content,error)
+	Create(content Content) (string, error)
+	ReadRange([]string) ([]Content, error)
 	DeleteById(string) error
 	UpdateById(string, Content) error
 }
