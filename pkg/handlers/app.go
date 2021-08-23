@@ -17,16 +17,16 @@ func Start() {
 	router := mux.NewRouter()
 	dbConnection := getDbConnetion()
 	ch := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
-  
-	router.HandleFunc("/api/v1/contents", ch.readAllContents).Methods(http.MethodGet)
-  
+
+	router.HandleFunc("/api/v1/contents/", ch.readAllContents).Methods(http.MethodGet)
+
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(ch.readContent).Methods(http.MethodGet)
   
 	router.Path("/api/v1/contents").Queries("id", "{id}").
 		HandlerFunc(ch.readRangeOfContents).Methods(http.MethodGet)
   
-	router.HandleFunc("/api/v1/content", ch.createContent).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/content/", ch.createContent).Methods(http.MethodPost)
   
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(ch.deleteContent).Methods(http.MethodDelete)

@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 )
 
 type ContentHandlers struct {
@@ -18,13 +19,21 @@ type ContentHandlers struct {
 }
 
 func (ch *ContentHandlers) readAllContents(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	contents, err := ch.service.ReadAllContents()
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response500(err.Error()))
+		return
 	}
-	w.Header().Add("Content-Type", "application/json")
+	if len(contents) == 0 {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response200("There in no contents found"))
+		return
+	}
 	json.NewEncoder(w).Encode(contents)
 }
+
 func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -33,24 +42,21 @@ func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
 	//if the string can't match with any RG, the response will be 400 (badrequest)
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("Parameter value is not valid"))
 		return
 	}
 	id := vars["id"]
 	log.Println(id)
 	content, err := ch.service.ReadContent(id)
 	if err != nil {
-		var res response
 		if err.Error() == "content not found" {
-			res = response{Message: "This id is not found", Status: "404"}
 			w.WriteHeader(http.StatusNotFound)
-
+			json.NewEncoder(w).Encode(response404("This id is not found"))
 		} else {
-			res = response{Message: err.Error(), Status: "503"}
-			w.WriteHeader(http.StatusServiceUnavailable)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response500(err.Error()))
 		}
-		json.NewEncoder(w).Encode(res)
 		return
-
 	}
 	json.NewEncoder(w).Encode(content)
 }
@@ -61,27 +67,40 @@ func (ch *ContentHandlers) readRangeOfContents(w http.ResponseWriter, r *http.Re
 	//regular expression to check if the string in the pattern of this examples ([1:2], [35:40])
 	pattern, _ := regexp.Match(`^([)([0-9]+)[:]([0-9]+)(])$`, []byte(params["id"]))
 	//if the string can't match with any RG, the response will be 400 (badrequest)
-	if !pattern {
-		w.WriteHeader(http.StatusNotFound)
+	idValues := parseNums(params["id"])
+	items, err := ch.service.ReadRangeOfContents(idValues)
+	if !pattern || idValues[0] > idValues[1] && len(idValues[0]) <= len(idValues[1]) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("Parameter value is not valid"))
 		return
 	}
-	idValues := parseNums(params["id"])
-	items, _ := ch.service.ReadRangeOfContents(idValues)
+	if len(items) == 0 {
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response500(err.Error()))
+			return
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(response404("No contents found in this range"))
+			return
+		}
+	}
 	json.NewEncoder(w).Encode(items)
 }
 
 func (ch *ContentHandlers) createContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var newContent content.Content
 	err := json.NewDecoder(r.Body).Decode(&newContent)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
+	if err != nil || newContent.Title == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("There is no title for the content"))
 		return
 	}
 	id, err := ch.service.CreateContent(newContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
+		json.NewEncoder(w).Encode(response500(err.Error()))
 		return
 	}
 	type ID struct {
@@ -89,43 +108,56 @@ func (ch *ContentHandlers) createContent(w http.ResponseWriter, r *http.Request)
 	}
 	var IDobj ID
 	IDobj.ID = id
-	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(IDobj)
 }
 
 func (ch *ContentHandlers) deleteContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	//regular expression to check if the string has numbers only	example: 1234
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("Parameter value is not valid"))
 		return
 	}
 	id := vars["id"]
 	log.Println(id)
-	_ = ch.service.DeleteContent(id)
-	w.Header().Add("Content-Type", "application/json")
+	err := ch.service.DeleteContent(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response500(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response200("This content has been deleted successfully"))
+	return
 }
 
 func (ch *ContentHandlers) updateContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	//regular expression to check if the string has numbers only	example: 1234
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("Parameter value is not valid"))
 		return
 	}
 	var newContent content.Content
+	newContent.Id, _=strconv.Atoi(vars["id"])
 	err := json.NewDecoder(r.Body).Decode(&newContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
+		json.NewEncoder(w).Encode(response500("Unexpected error"))
 		return
 	}
 	err = ch.service.UpdateContent(mux.Vars(r)["id"], newContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
+		json.NewEncoder(w).Encode(response500(err.Error()))
 		return
 	}
+	json.NewEncoder(w).Encode(newContent)
 }
