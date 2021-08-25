@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/domain/content"
+	"github.com/tamiat/backend/pkg/domain/contentType"
 	"github.com/tamiat/backend/pkg/service"
 	"log"
 	"net/http"
@@ -21,27 +22,34 @@ func Start() {
 	origins := handlers.AllowedOrigins([]string{"*"})
 	dbConnection := getDbConnetion()
 	ch := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
+	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection))}
 
 	router.HandleFunc("/api/v1/contents/", ch.readAllContents).Methods(http.MethodGet)
 
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(ch.readContent).Methods(http.MethodGet)
-  
+
 	router.Path("/api/v1/contents").Queries("id", "{id}").
 		HandlerFunc(ch.readRangeOfContents).Methods(http.MethodGet)
-  
+
 	router.HandleFunc("/api/v1/content/", ch.createContent).Methods(http.MethodPost)
-  
+
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(ch.deleteContent).Methods(http.MethodDelete)
-  
+
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(ch.updateContent).Methods(http.MethodPut)
-  
-	log.Fatal(http.ListenAndServe("localhost:8080", handlers.CORS(headers,methods,origins)(router)))
+
+	router.Path("/api/v1/contentType").
+		HandlerFunc(ct.createContentType).Methods(http.MethodPost)
+
+	router.Path("/api/v1/contentType").Queries("id", "{id}").
+		HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
+
+	log.Fatal(http.ListenAndServe("localhost:8080", handlers.CORS(headers, methods, origins)(router)))
 }
 
-func getDbConnetion() *sql.DB{
+func getDbConnetion() *sql.DB {
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",
 		os.Getenv("HOST"),
 		os.Getenv("DBPORT"),
