@@ -7,6 +7,6 @@ type User struct {
 }
 
 type UserRepository interface {
-	Login(User)(error)
+	Login(User)(string,error)
 	Signup(User)(User,error)
 }
