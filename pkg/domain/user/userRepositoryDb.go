@@ -2,9 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
-	"net/http"
 )
 
 type UserRepositoryDb struct {
