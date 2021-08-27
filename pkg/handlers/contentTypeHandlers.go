@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/service"
 	"io/ioutil"
@@ -87,6 +88,11 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 	log.Println(id)
 	err := ch.service.DeleteContentType(id)
 	if err != nil {
+		if err.Error() == "content not found" {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(response404(err.Error()))
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response500(err.Error()))
 		return
@@ -96,4 +102,64 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 	return
 }
 
-
+func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	//regular expression to check if the string has numbers only	example: 1234
+	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
+	if !pattern1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("Parameter value is not valid"))
+		return
+	}
+	id := vars["id"]
+	log.Println(id)
+	var newContentType interface{} // The interface where we will save the converted JSON data.
+	buffer, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+		return
+	}
+	err = r.Body.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+		return
+	} // Close this
+	err = json.Unmarshal(buffer, &newContentType)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+		return
+	} // Convert JSON data into interface{} type
+	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
+	// into a map[string]interface{}
+	i := 0
+	var oldName, newName string
+	for key, element := range m {
+		i++
+		oldName = key
+		newName = strings.TrimSpace(element.(string))
+	}
+	fmt.Println(i)
+	if i != 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("no specific column was sent"))
+		return
+	}
+	err = ch.service.UpdateColName(id, oldName, newName)
+	if err != nil {
+		if err.Error() == "content not found" {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(response404(err.Error()))
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response500(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response200("This column has been renamed successfully"))
+	return
+}
