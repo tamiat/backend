@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/tamiat/backend/pkg/domain"
 	"github.com/tamiat/backend/pkg/domain/user"
-	"github.com/tamiat/backend/pkg/handlers"
 	"net/http"
 	"os"
 	"strings"
@@ -15,6 +15,7 @@ import (
 
 func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		secret:=fmt.Sprintf("%s",os.Getenv("SECRET"))
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) == 2 {
@@ -23,23 +24,23 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("There was an error")
 				}
-				return []byte("secret"), nil
+				return []byte(secret), nil
 			})
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(handlers.Response401(err.Error()))
+				json.NewEncoder(w).Encode(domain.Response401(err.Error()))
 				return
 			}
 			if token.Valid {
 				next.ServeHTTP(w, r)
 			} else {
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(handlers.Response401(err.Error()))
+				json.NewEncoder(w).Encode(domain.Response401(err.Error()))
 				return
 			}
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(handlers.Response401("Invalid token"))
+			json.NewEncoder(w).Encode(domain.Response401("Invalid token"))
 			return
 		}
 	})

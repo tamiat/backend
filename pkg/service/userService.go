@@ -20,3 +20,7 @@ func (s DefaultUserService )Login(user user.User) (string,error) {
 func (s DefaultUserService )Signup(user user.User) (int,error) {
 	return s.repo.Signup(user)
 }
+
+func NewUserService(repository user.UserRepository) DefaultUserService {
+	return DefaultUserService{repo: repository}
+}

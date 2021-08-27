@@ -128,6 +128,14 @@ ALTER TABLE ONLY public.contents
 
 
 --
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: rahma
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: rahma
 --
 

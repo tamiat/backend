@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/tamiat/backend/pkg/domain"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
@@ -27,7 +28,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	status,msg:=validateEmailAndPassword(userObj)
 	if status==http.StatusBadRequest{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response400(msg))
+		json.NewEncoder(w).Encode(domain.Response400(msg))
 		return
 	}
 	//encrypting password
@@ -35,7 +36,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		//TODO check if this is right
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(Response500(err.Error()))
+		json.NewEncoder(w).Encode(domain.Response500(err.Error()))
 		return
 	}
 	userObj.Password = string(hash)
@@ -43,10 +44,11 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	userObj.Id,err = receiver.service.Signup(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode("Internal server error")
+		json.NewEncoder(w).Encode(domain.Response500("Internal server error"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	userObj.Password = ""
 	json.NewEncoder(w).Encode(userObj)
 }
 func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
@@ -56,18 +58,18 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	status,msg:=validateEmailAndPassword(userObj)
 	if status==http.StatusBadRequest{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response400(msg))
+		json.NewEncoder(w).Encode(domain.Response400(msg))
 		return
 	}
 	hashedPassword,err:=receiver.service.Login(userObj)
 	if err!=nil{
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(Response500("This user does not exist"))
+			json.NewEncoder(w).Encode(domain.Response500("This user does not exist"))
 			return
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(Response500("Server error"))
+			json.NewEncoder(w).Encode(domain.Response500("Server error"))
 			return
 		}
 	}
@@ -76,13 +78,12 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(Response401("Invalid Password"))
 		return
 	}
 	token, err := middleware.GenerateToken(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(Response401("can't generate token"))
+		json.NewEncoder(w).Encode(domain.Response401("can't generate token"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)

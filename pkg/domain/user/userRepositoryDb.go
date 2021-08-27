@@ -9,8 +9,8 @@ type UserRepositoryDb struct {
 }
 
 func (r UserRepositoryDb) Login(userObj User) (string,error){
-	row := r.db.QueryRow("select * from users where email=$1", userObj.Email)
-	err := row.Scan(&userObj.Id, &userObj.Email, &userObj.Password)
+	row := r.db.QueryRow("select password from users where email=$1", userObj.Email)
+	err := row.Scan(&userObj.Password)
 	if err != nil {
 		return "",err
 	}
@@ -24,4 +24,8 @@ func (r UserRepositoryDb) Signup(user User) (int,error){
 		return 0,err
 	}
 	return user.Id,nil
+}
+
+func NewUserRepositoryDb(db *sql.DB) UserRepositoryDb {
+	return UserRepositoryDb{db}
 }

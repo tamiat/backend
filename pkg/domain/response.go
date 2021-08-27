@@ -1,4 +1,4 @@
-package handlers
+package domain
 
 type response struct {
 	Message string `json:"message"`
