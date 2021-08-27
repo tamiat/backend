@@ -1,48 +1,49 @@
 package middleware
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/tamiat/backend/pkg/domain/user"
+	"github.com/tamiat/backend/pkg/handlers"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 
-/*func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
+func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var errorObject Error
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
-
 		if len(bearerToken) == 2 {
 			authToken := bearerToken[1]
-			token, error := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
+			token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("There was an error")
 				}
 				return []byte("secret"), nil
 			})
-			if error != nil {
-				errorObject.Message = error.Error()
-				responseJSONWithError(w, http.StatusUnauthorized, errorObject)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(handlers.Response401(err.Error()))
 				return
 			}
 			if token.Valid {
 				next.ServeHTTP(w, r)
 			} else {
-				errorObject.Message = error.Error()
-				responseJSONWithError(w, http.StatusUnauthorized, errorObject)
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(handlers.Response401(err.Error()))
 				return
 			}
 		} else {
-			errorObject.Message = "Invalid token."
-			responseJSONWithError(w, http.StatusUnauthorized, errorObject)
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(handlers.Response401("Invalid token"))
 			return
 		}
 	})
-}*/
-
+}
 func GenerateToken(user user.User) (string, error) {
 	var err error
 	secret:=fmt.Sprintf("%s",os.Getenv("SECRET"))
