@@ -8,5 +8,5 @@ type User struct {
 
 type UserRepository interface {
 	Login(User)(string,error)
-	Signup(User)(User,error)
+	Signup(User)(int,error)
 }

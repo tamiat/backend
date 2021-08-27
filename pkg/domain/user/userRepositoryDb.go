@@ -17,6 +17,11 @@ func (r UserRepositoryDb) Login(userObj User) (string,error){
 	return userObj.Password,nil
 }
 
-func (r UserRepositoryDb) Signup(user User) (User,error){
-	return user,nil
+func (r UserRepositoryDb) Signup(user User) (int,error){
+	query := "insert into users (email, password) values($1, $2) RETURNING id;"
+	err := r.db.QueryRow(query, user.Email, user.Password).Scan(&user.Id)
+	if err != nil {
+		return 0,err
+	}
+	return user.Id,nil
 }
