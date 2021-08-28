@@ -26,6 +26,21 @@ func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 	return name, nil
 }
 
+func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) error {
+	query := "SELECT COUNT(*) FROM information_schema.columns WHERE table_name= '" + tableName + "' and column_name='" + colName + "'"
+	row := r.db.QueryRow(query)
+	var numOfCols int
+	err := row.Scan(&numOfCols)
+	fmt.Println(numOfCols, colName, query)
+	if err != nil {
+		return errors.New("Unexpected database error")
+	}
+	if numOfCols == 0 {
+		return errors.New("column not found")
+	}
+	return nil
+}
+
 func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
 	var query = "INSERT INTO contentType (name) VALUES ('" + n + "')"
 	_, err := r.db.Exec(query)
@@ -74,17 +89,11 @@ func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newNam
 	if err != nil {
 		return err
 	}
-	query := "SELECT COUNT(*) FROM information_schema.columns WHERE table_name= '" + name + "' and column_name='" + oldName + "'"
-	row := r.db.QueryRow(query)
-	var colName int
-	err = row.Scan(&colName)
+	err = r.isColExists(name, oldName)
 	if err != nil {
-		return errors.New("Unexpected database error")
+		return err
 	}
-	if colName == 0 {
-		return errors.New("column not found")
-	}
-	query = "ALTER TABLE " + name + " RENAME COLUMN " + oldName + " TO " + newName
+	query := "ALTER TABLE " + name + " RENAME COLUMN " + oldName + " TO " + newName
 	_, err = r.db.Exec(query)
 	if err != nil {
 		return errors.New("Unexpected database error")
@@ -98,6 +107,24 @@ func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
 		return err
 	}
 	query := "ALTER TABLE " + name + " ADD COLUMN " + col
+	fmt.Println(query)
+	_, err = r.db.Exec(query)
+	if err != nil {
+		return errors.New("Unexpected database error")
+	}
+	return nil
+}
+
+func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
+	name, err := r.isTableExists(id)
+	if err != nil {
+		return err
+	}
+	err = r.isColExists(name, col)
+	if err != nil {
+		return err
+	}
+	query := "ALTER TABLE " + name + " DROP COLUMN " + col
 	fmt.Println(query)
 	_, err = r.db.Exec(query)
 	if err != nil {
