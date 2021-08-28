@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/service"
 	"io/ioutil"
@@ -20,35 +19,20 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 	w.Header().Set("Content-Type", "application/json")
 	var newContentType interface{} // The interface where we will save the converted JSON data.
 	buffer, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
-		return
-	}
 	err = r.Body.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
-		return
-	} // Close this
 	err = json.Unmarshal(buffer, &newContentType)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
-		return
-	} // Convert JSON data into interface{} type
 	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
 	// into a map[string]interface{}
-	var name, cols string
+	var name, col string
 	name = ""
 	for key, element := range m {
 		if key == "name" {
 			name = strings.TrimSpace(m["name"].(string))
 		} else {
-			cols += key
-			cols += " "
-			cols += strings.TrimSpace(element.(string))
-			cols += ","
+			col += key
+			col += " "
+			col += strings.TrimSpace(element.(string))
+			col += ","
 		}
 	}
 	if name == "" {
@@ -56,9 +40,9 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 		json.NewEncoder(w).Encode(response400("There is no content type name"))
 		return
 	}
-	cols = cols[0 : len(cols)-1]
+	col = col[0 : len(col)-1]
 	var id string
-	id, err = ch.service.CreateContentType(name, cols)
+	id, err = ch.service.CreateContentType(name, col)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response500(err.Error()))
@@ -116,23 +100,8 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 	log.Println(id)
 	var newContentType interface{} // The interface where we will save the converted JSON data.
 	buffer, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
-		return
-	}
 	err = r.Body.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
-		return
-	} // Close this
 	err = json.Unmarshal(buffer, &newContentType)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
-		return
-	} // Convert JSON data into interface{} type
 	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
 	// into a map[string]interface{}
 	i := 0
@@ -142,7 +111,6 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 		oldName = key
 		newName = strings.TrimSpace(element.(string))
 	}
-	fmt.Println(i)
 	if i != 1 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response400("no specific column was sent"))
@@ -161,5 +129,51 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response200("This column has been renamed successfully"))
+	return
+}
+
+func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	//regular expression to check if the string has numbers only	example: 1234
+	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
+	if !pattern1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("Parameter value is not valid"))
+		return
+	}
+	id := vars["id"]
+	var newContentType interface{} // The interface where we will save the converted JSON data.
+	buffer, err := ioutil.ReadAll(r.Body)
+	err = r.Body.Close()
+	err = json.Unmarshal(buffer, &newContentType)
+	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
+	// into a map[string]interface{}
+	var col string
+	i := 0
+	for key, element := range m {
+		i++
+		col += key
+		col += " "
+		col += strings.TrimSpace(element.(string))
+	}
+	if i != 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response400("no specific column was sent"))
+		return
+	}
+	err = ch.service.AddCol(id, col)
+	if err != nil {
+		if err.Error() == "content not found" {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(response404(err.Error()))
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response500(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response200("This new column has been added successfully"))
 	return
 }

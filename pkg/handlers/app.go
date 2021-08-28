@@ -45,9 +45,12 @@ func Start() {
 
 	router.Path("/api/v1/contentType").Queries("id", "{id}").
 		HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
-	router.Path("/api/v1/contentType").Queries("id", "{id}").
+
+	router.Path("/api/v1/contentType/rename").Queries("id", "{id}").
 		HandlerFunc(ct.updateColName).Methods(http.MethodPut)
 
+	router.Path("/api/v1/contentType/add").Queries("id", "{id}").
+		HandlerFunc(ct.addCol).Methods(http.MethodPut)
 	log.Fatal(http.ListenAndServe("localhost:8080", handlers.CORS(headers, methods, origins)(router)))
 }
 

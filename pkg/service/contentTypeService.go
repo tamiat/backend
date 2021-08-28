@@ -8,6 +8,7 @@ type ContentTypeService interface {
 	CreateContentType(string, string) (string, error)
 	DeleteContentType(string) error
 	UpdateColName(string, string, string) error
+	AddCol (string, string) error
 }
 
 type DefaultContentTypeService struct {
@@ -25,6 +26,11 @@ func (s DefaultContentTypeService) DeleteContentType(id string) error {
 func (s DefaultContentTypeService) UpdateColName(id string, oldName string, newName string) error {
 	return s.repo.UpdateColName(id, oldName, newName)
 }
+
+func (s DefaultContentTypeService) AddCol(id string, col string) error {
+	return s.repo.AddCol(id, col)
+}
+
 
 func NewContentTypeService(repository contentType.ContentTypeRepository) DefaultContentTypeService {
 	return DefaultContentTypeService{repo: repository}
