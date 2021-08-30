@@ -5,15 +5,16 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/domain/content"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
-	"log"
-	"net/http"
-	"os"
+
 )
 
 func Start() {

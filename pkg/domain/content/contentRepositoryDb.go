@@ -3,9 +3,9 @@ package content
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"log"
 )
 
 // ContentRepositoryDb implements the ContentRepository interface

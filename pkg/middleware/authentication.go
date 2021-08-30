@@ -3,13 +3,13 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/tamiat/backend/pkg/domain"
-	"github.com/tamiat/backend/pkg/domain/user"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/tamiat/backend/pkg/domain"
+	"github.com/tamiat/backend/pkg/domain/user"
 )
 
 

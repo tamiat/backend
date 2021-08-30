@@ -5,14 +5,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/tamiat/backend/pkg/domain"
-	"github.com/tamiat/backend/pkg/domain/content"
-	"github.com/tamiat/backend/pkg/service"
 	"log"
 	"net/http"
 	"regexp"
 	"strconv"
+	"github.com/gorilla/mux"
+	"github.com/tamiat/backend/pkg/domain"
+	"github.com/tamiat/backend/pkg/domain/content"
+	"github.com/tamiat/backend/pkg/service"
 )
 
 type ContentHandlers struct {
