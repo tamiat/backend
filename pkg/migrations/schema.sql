@@ -58,6 +58,42 @@ ALTER SEQUENCE public.contents_id_seq OWNED BY public.contents.id;
 
 
 --
+-- Name: contenttype; Type: TABLE; Schema: public; Owner: rahma
+--
+
+CREATE TABLE public.contenttype (
+    id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    name character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.contenttype OWNER TO rahma;
+
+--
+-- Name: contenttype_id_seq; Type: SEQUENCE; Schema: public; Owner: rahma
+--
+
+CREATE SEQUENCE public.contenttype_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.contenttype_id_seq OWNER TO rahma;
+
+--
+-- Name: contenttype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rahma
+--
+
+ALTER SEQUENCE public.contenttype_id_seq OWNED BY public.contenttype.id;
+
+
+--
 -- Name: schema_migration; Type: TABLE; Schema: public; Owner: rahma
 --
 
@@ -113,6 +149,13 @@ ALTER TABLE ONLY public.contents ALTER COLUMN id SET DEFAULT nextval('public.con
 
 
 --
+-- Name: contenttype id; Type: DEFAULT; Schema: public; Owner: rahma
+--
+
+ALTER TABLE ONLY public.contenttype ALTER COLUMN id SET DEFAULT nextval('public.contenttype_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: rahma
 --
 
@@ -125,6 +168,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.contents
     ADD CONSTRAINT contents_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: contenttype contenttype_pkey; Type: CONSTRAINT; Schema: public; Owner: rahma
+--
+
+ALTER TABLE ONLY public.contenttype
+    ADD CONSTRAINT contenttype_pkey PRIMARY KEY (id);
 
 
 --

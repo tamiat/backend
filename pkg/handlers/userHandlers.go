@@ -1,15 +1,16 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
-	"github.com/tamiat/backend/pkg/domain"
-	"github.com/tamiat/backend/pkg/domain/user"
-	"github.com/tamiat/backend/pkg/middleware"
-	"github.com/tamiat/backend/pkg/service"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/mail"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/tamiat/backend/pkg/domain/user"
+	"github.com/tamiat/backend/pkg/errs"
+	"github.com/tamiat/backend/pkg/middleware"
+	"github.com/tamiat/backend/pkg/service"
 )
 
 type UserHandlers struct {
@@ -25,10 +26,10 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
 	//validating email and password
-	status,msg:=validateEmailAndPassword(userObj)
-	if status==http.StatusBadRequest{
+	err:=validateEmailAndPassword(userObj)
+	if err!=nil{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400(msg))
+		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusBadRequest))
 		return
 	}
 	//encrypting password
@@ -36,15 +37,15 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		//TODO check if this is right
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	userObj.Password = string(hash)
 	//database connection
-	userObj.Id,err = receiver.service.Signup(userObj)
+	userObj.ID,err = receiver.service.Signup(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500("Internal server error"))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -55,35 +56,30 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
 	//validating email and password
-	status,msg:=validateEmailAndPassword(userObj)
-	if status==http.StatusBadRequest{
+	err:=validateEmailAndPassword(userObj)
+	if err!=nil{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400(msg))
+		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusBadRequest))
 		return
 	}
 	hashedPassword,err:=receiver.service.Login(userObj)
 	if err!=nil{
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(domain.Response500("This user does not exist"))
-			return
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(domain.Response500("Server error"))
-			return
-		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.DbError.Error(),http.StatusInternalServerError))
+		return
 	}
 	//usr password before hashing
 	password := userObj.Password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.InvalidPassword.Error(),http.StatusUnauthorized))
 		return
 	}
 	token, err := middleware.GenerateToken(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(domain.Response401("can't generate token"))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.TokenErr.Error(),http.StatusUnauthorized))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -94,23 +90,16 @@ func valid(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
 }
-func validateEmailAndPassword(userObj user.User)(int,string){
+func validateEmailAndPassword(userObj user.User)error{
 	//err error()
 	if userObj.Email == "" {
-		/*w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response400("Email is missing"))
-		return*/
-		return http.StatusBadRequest,"Email is missing"
+		return errs.EmailMissing
 	}
 	if !valid(userObj.Email){
-		/*w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response400("Invalid Email"))*/
-		return http.StatusBadRequest,"Invalid Email"
+		return errs.InvalidEmail
 	}
 	if userObj.Password == "" {
-		/*w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response400("Password is missing"))*/
-		return http.StatusBadRequest,"Password is missing"
+		return errs.InvalidPassword
 	}
-	return -1,""
+	return nil
 }

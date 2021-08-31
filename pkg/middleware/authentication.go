@@ -7,9 +7,11 @@ import (
 	"os"
 	"strings"
 	"time"
+
 	"github.com/dgrijalva/jwt-go"
-	"github.com/tamiat/backend/pkg/domain"
+
 	"github.com/tamiat/backend/pkg/domain/user"
+	"github.com/tamiat/backend/pkg/errs"
 )
 
 
@@ -27,20 +29,23 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 				return []byte(secret), nil
 			})
 			if err != nil {
+				//TODO
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(domain.Response401(err.Error()))
+				json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
 				return
 			}
 			if token.Valid {
 				next.ServeHTTP(w, r)
 			} else {
+				//TODO
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(domain.Response401(err.Error()))
+				json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
 				return
 			}
 		} else {
+			//TODO
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(domain.Response401("Invalid token"))
+			json.NewEncoder(w).Encode(errs.NewResponse(errs.InvalidToken.Error(),http.StatusUnauthorized))
 			return
 		}
 	})

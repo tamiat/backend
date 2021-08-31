@@ -1,10 +1,14 @@
 package content
 
+import "time"
+
 // Content  model
 type Content struct {
-	Id      int    `json:"id"`
-	Title   string `json:"title"`
+	ID    int    `json:"id"`
+	Title string `json:"title"`
 	Details string `json:"details"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 type ContentRepository interface {
 

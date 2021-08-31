@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+
 	"github.com/gorilla/mux"
-	"github.com/tamiat/backend/pkg/domain"
+
 	"github.com/tamiat/backend/pkg/domain/content"
+	"github.com/tamiat/backend/pkg/errs"
 	"github.com/tamiat/backend/pkg/service"
 )
 
@@ -24,12 +26,12 @@ func (ch *ContentHandlers) readAllContents(w http.ResponseWriter, r *http.Reques
 	contents, err := ch.service.ReadAllContents()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+		json.NewEncoder(w).Encode(errs.ServerErr)
 		return
 	}
 	if len(contents) == 0 {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(domain.Response200("There in no contents found"))
+		json.NewEncoder(w).Encode(errs.Content200)
 		return
 	}
 	json.NewEncoder(w).Encode(contents)
@@ -43,7 +45,7 @@ func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
 	//if the string can't match with any RG, the response will be 400 (badrequest)
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400("Parameter value is not valid"))
+		json.NewEncoder(w).Encode(errs.ContentParams)
 		return
 	}
 	id := vars["id"]
@@ -52,10 +54,10 @@ func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err.Error() == "content not found" {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(domain.Response404("This id is not found"))
+			json.NewEncoder(w).Encode(errs.Content404)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+			json.NewEncoder(w).Encode(errs.ServerErr)
 		}
 		return
 	}
@@ -72,17 +74,17 @@ func (ch *ContentHandlers) readRangeOfContents(w http.ResponseWriter, r *http.Re
 	items, err := ch.service.ReadRangeOfContents(idValues)
 	if !pattern || idValues[0] > idValues[1] && len(idValues[0]) <= len(idValues[1]) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400("Parameter value is not valid"))
+		json.NewEncoder(w).Encode(errs.ContentParams)
 		return
 	}
 	if len(items) == 0 {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+			json.NewEncoder(w).Encode(errs.ServerErr)
 			return
 		} else {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(domain.Response404("No contents found in this range"))
+			json.NewEncoder(w).Encode(errs.ContentType404)
 			return
 		}
 	}
@@ -95,13 +97,13 @@ func (ch *ContentHandlers) createContent(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&newContent)
 	if err != nil || newContent.Title == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400("There is no title for the content"))
+		json.NewEncoder(w).Encode(errs.ContentParams)
 		return
 	}
 	id, err := ch.service.CreateContent(newContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+		json.NewEncoder(w).Encode(errs.ServerErr)
 		return
 	}
 	type ID struct {
@@ -120,7 +122,7 @@ func (ch *ContentHandlers) deleteContent(w http.ResponseWriter, r *http.Request)
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400("Parameter value is not valid"))
+		json.NewEncoder(w).Encode(errs.ContentParams)
 		return
 	}
 	id := vars["id"]
@@ -128,11 +130,11 @@ func (ch *ContentHandlers) deleteContent(w http.ResponseWriter, r *http.Request)
 	err := ch.service.DeleteContent(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+		json.NewEncoder(w).Encode(errs.ServerErr)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(domain.Response200("This content has been deleted successfully"))
+	json.NewEncoder(w).Encode("This content has been deleted successfully")
 	return
 }
 
@@ -143,21 +145,21 @@ func (ch *ContentHandlers) updateContent(w http.ResponseWriter, r *http.Request)
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(domain.Response400("Parameter value is not valid"))
+		json.NewEncoder(w).Encode(errs.ContentParams)
 		return
 	}
 	var newContent content.Content
-	newContent.Id, _=strconv.Atoi(vars["id"])
+	newContent.ID, _=strconv.Atoi(vars["id"])
 	err := json.NewDecoder(r.Body).Decode(&newContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500("Unexpected error"))
+		json.NewEncoder(w).Encode(errs.UnexpectedError)
 		return
 	}
 	err = ch.service.UpdateContent(mux.Vars(r)["id"], newContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(domain.Response500(err.Error()))
+		json.NewEncoder(w).Encode(errs.ServerErr)
 		return
 	}
 	json.NewEncoder(w).Encode(newContent)

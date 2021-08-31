@@ -1,31 +1,30 @@
 package user
 
 import (
-	"database/sql"
+	"gorm.io/gorm"
+
+	"github.com/tamiat/backend/pkg/errs"
 )
 
 type UserRepositoryDb struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 func (r UserRepositoryDb) Login(userObj User) (string,error){
-	row := r.db.QueryRow("select password from users where email=$1", userObj.Email)
-	err := row.Scan(&userObj.Password)
-	if err != nil {
-		return "",err
+	var retrievedUsr User
+	if err := r.db.Where("email = ?", userObj.Email).First(&retrievedUsr).Error; err!=nil{
+		return "",errs.DbError
 	}
-	return userObj.Password,nil
+	return retrievedUsr.Password,nil
 }
 
 func (r UserRepositoryDb) Signup(user User) (int,error){
-	query := "insert into users (email, password) values($1, $2) RETURNING id;"
-	err := r.db.QueryRow(query, user.Email, user.Password).Scan(&user.Id)
-	if err != nil {
-		return 0,err
+	if err:= r.db.Select("email","password").Create(&user).Error; err!=nil{
+		return -1,errs.DbError
 	}
-	return user.Id,nil
+	return user.ID,nil
 }
 
-func NewUserRepositoryDb(db *sql.DB) UserRepositoryDb {
+func NewUserRepositoryDb(db *gorm.DB) UserRepositoryDb {
 	return UserRepositoryDb{db}
 }

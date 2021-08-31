@@ -192,6 +192,40 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "user endpoints",
+			"item": [
+				{
+					"name": "login",
+					"id": "37395e7b-666b-4279-81d9-768ed3615179",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"uuuuuu@gmail.com\",\n    \"password\":\"0387573665\"\n}"
+						},
+						"url": "http://localhost:8080/api/v1/login"
+					},
+					"response": []
+				},
+				{
+					"name": "signup",
+					"id": "3272572d-9e58-4607-a444-86475434de82",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"name@gmail.com\",\n    \"password\":\"0387573665\"\n}"
+						},
+						"url": "http://localhost:8080/api/v1/signup"
+					},
+					"response": []
+				}
+			],
+			"id": "1b93a26b-88b7-42e1-8751-1dcb21149a47"
 		}
 	]
 }
