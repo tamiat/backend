@@ -18,9 +18,9 @@ func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 	err := row.Scan(&name)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", errs.ContentType404
+			return "", errs.ErrContentTypeNotFound
 		} else {
-			return "", errs.DbError
+			return "", errs.ErrDb
 		}
 	}
 	return name, nil
@@ -33,10 +33,10 @@ func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) e
 	err := row.Scan(&numOfCols)
 	fmt.Println(numOfCols, colName, query)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	if numOfCols == 0 {
-		return errs.Column404
+		return errs.ErrColumnNotFound
 	}
 	return nil
 }
@@ -45,19 +45,19 @@ func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
 	var query = "INSERT INTO contentType (name) VALUES ('" + n + "')"
 	_, err := r.db.Exec(query)
 	if err != nil {
-		return "", errs.DbError
+		return "", errs.ErrDb
 	}
 	query = "CREATE TABLE " + n + " ( " + cols + " )"
 	_, err = r.db.Exec(query)
 	if err != nil {
-		return "", errs.DbError
+		return "", errs.ErrDb
 	}
 	query = `SELECT currval(pg_get_serial_sequence('contentType','id'));`
 	row := r.db.QueryRow(query)
 	var id string
 	switch err := row.Scan(&id); err {
 	case sql.ErrNoRows:
-		return "", errs.DbError
+		return "", errs.ErrDb
 	case nil:
 		return id, nil
 	default:
@@ -74,12 +74,12 @@ func (r ContentTypeRepositoryDb) DeleteById(id string) error {
 	query := "DROP TABLE " + name
 	_, err = r.db.Exec(query)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	query = "DELETE FROM contentType" + " WHERE id=" + id
 	_, err = r.db.Exec(query)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	return nil
 }
@@ -96,7 +96,7 @@ func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newNam
 	query := "ALTER TABLE " + name + " RENAME COLUMN " + oldName + " TO " + newName
 	_, err = r.db.Exec(query)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	return nil
 }
@@ -110,7 +110,7 @@ func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
 	fmt.Println(query)
 	_, err = r.db.Exec(query)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	return nil
 }
@@ -128,7 +128,7 @@ func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
 	fmt.Println(query)
 	_, err = r.db.Exec(query)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	return nil
 }

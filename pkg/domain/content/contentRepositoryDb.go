@@ -39,10 +39,10 @@ func (d ContentRepositoryDb) ReadById(id string) (*Content, error) {
 	err := row.Scan(&c.Id, &c.Title, &c.Details)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errs.Content404
+			return nil, errs.ErrContentNotFound 
 		} else {
 			log.Println("error while querying in repoDB" + err.Error())
-			return nil, errs.DbError
+			return nil, errs.ErrDb
 		}
 	}
 	return &c, nil
@@ -54,7 +54,7 @@ func (d ContentRepositoryDb) ReadRange(ids []string) ([]Content, error) {
 	rows, err := d.db.Query(query, ids[0], ids[1])
 	if err != nil {
 		panic(err)
-		return res, errs.DbError
+		return res, errs.ErrDb
 	}
 	for rows.Next() {
 		var item Content
@@ -74,7 +74,7 @@ func (d ContentRepositoryDb) Create(newContent Content) (string, error) {
 	query := `INSERT INTO contents (title, details) VALUES ($1, $2)`
 	_, err := d.db.Exec(query, newContent.Title, newContent.Details)
 	if err != nil {
-		return "", errs.DbError
+		return "", errs.ErrDb
 	}
 	query = `SELECT currval(pg_get_serial_sequence('contents','id'));`
 	row := d.db.QueryRow(query)
@@ -94,7 +94,7 @@ func (d ContentRepositoryDb) DeleteById(id string) error {
 	query := `DELETE FROM contents WHERE id=$1`
 	_, err := d.db.Exec(query,id)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func (d ContentRepositoryDb) UpdateById(id string, UpdContent Content) error {
 	query := `UPDATE contents SET title=$1, details=$2 Where id=$3`
 	_, err := d.db.Exec(query, UpdContent.Title, UpdContent.Details, id)
 	if err != nil {
-		return errs.DbError
+		return errs.ErrDb
 	}
 	return nil
 }
