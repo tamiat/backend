@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/tamiat/backend/pkg/domain/content"
+  "github.com/tamiat/backend/pkg/domain/contentType"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
@@ -27,22 +28,30 @@ func Start() {
 	dbConnection := getDbConnetion()
 	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
 	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection))}
-
-	router.HandleFunc("/api/v1/contents/", middleware.TokenVerifyMiddleWare(contentHandler.readAllContents)).Methods(http.MethodGet)
-
+	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection))}
+  
+  router.Path("/api/v1/contentType").
+		HandlerFunc(ct.createContentType).Methods(http.MethodPost)
+	router.Path("/api/v1/contentType").Queries("id", "{id}").
+		HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
+	router.Path("/api/v1/contentType/renamecol").Queries("id", "{id}").
+		HandlerFunc(ct.updateColName).Methods(http.MethodPut)
+	router.Path("/api/v1/contentType/addcol").Queries("id", "{id}").
+		HandlerFunc(ct.addCol).Methods(http.MethodPut)
+	router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
+		HandlerFunc(ct.deleteCol).Methods(http.MethodPut)
+  
+  router.HandleFunc("/api/v1/contents/", middleware.TokenVerifyMiddleWare(contentHandler.readAllContents)).Methods(http.MethodGet)
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.readContent)).Methods(http.MethodGet)
-  
 	router.Path("/api/v1/contents").Queries("id", "{id}").
 		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.readRangeOfContents)).Methods(http.MethodGet)
-  
 	router.HandleFunc("/api/v1/content/", middleware.TokenVerifyMiddleWare(contentHandler.createContent)).Methods(http.MethodPost)
-  
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.deleteContent)).Methods(http.MethodDelete)
-  
 	router.Path("/api/v1/content").Queries("id", "{id}").
 		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.updateContent)).Methods(http.MethodPut)
+  
 	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
 	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
   
