@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/tamiat/backend/pkg/errs"
 
+	"github.com/tamiat/backend/pkg/errs"
 	"github.com/tamiat/backend/pkg/service"
 )
 
@@ -68,7 +68,7 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("Parameter value is not valid",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
 		return
 	}
 	id := vars["id"]
@@ -96,7 +96,7 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("Parameter value is not valid",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
 		return
 	}
 	id := vars["id"]
@@ -116,7 +116,7 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 	}
 	if i != 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("no specific column name was sent",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
 	err = ch.service.UpdateColName(id, oldName, newName)
@@ -142,7 +142,7 @@ func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("Parameter value is not valid",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
 		return
 	}
 	id := vars["id"]
@@ -162,14 +162,14 @@ func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 	}
 	if i != 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("no specific column name was sent",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
 	err = ch.service.AddCol(id, col)
 	if err != nil {
 		if err.Error() == "content type not found" {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusBadRequest))
+			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -188,7 +188,7 @@ func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request)
 	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
 	if !pattern1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("Parameter value is not valid",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
 		return
 	}
 	id := vars["id"]
@@ -206,7 +206,7 @@ func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request)
 	}
 	if i != 1 || m["column name"] != col {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("no specific column name was sent",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
 	err = ch.service.DeleteCol(id, col)
