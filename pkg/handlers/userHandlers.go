@@ -37,7 +37,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		//TODO check if this is right
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ServerErr.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	userObj.Password = string(hash)
@@ -45,7 +45,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	userObj.ID,err = receiver.service.Signup(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ServerErr.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -65,7 +65,7 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	hashedPassword,err:=receiver.service.Login(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.DbError.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrDb.Error(),http.StatusInternalServerError))
 		return
 	}
 	//usr password before hashing
@@ -73,13 +73,13 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.InvalidPassword.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidPassword.Error(),http.StatusUnauthorized))
 		return
 	}
 	token, err := middleware.GenerateToken(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.TokenErr.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrTokenErr.Error(),http.StatusUnauthorized))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -93,13 +93,13 @@ func valid(email string) bool {
 func validateEmailAndPassword(userObj user.User)error{
 	//err error()
 	if userObj.Email == "" {
-		return errs.EmailMissing
+		return errs.ErrEmailMissing
 	}
 	if !valid(userObj.Email){
-		return errs.InvalidEmail
+		return errs.ErrInvalidEmail
 	}
 	if userObj.Password == "" {
-		return errs.InvalidPassword
+		return errs.ErrInvalidPassword
 	}
 	return nil
 }

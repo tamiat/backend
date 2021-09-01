@@ -45,7 +45,7 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 		} else {
 			//TODO
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(errs.InvalidToken.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidToken.Error(),http.StatusUnauthorized))
 			return
 		}
 	})
