@@ -1,16 +1,13 @@
 package contentType
 
 import (
-	"database/sql"
-	"fmt"
-
-	"github.com/tamiat/backend/pkg/errs"
+	"gorm.io/gorm"
 )
 
 type ContentTypeRepositoryDb struct {
-	db *sql.DB
+	db *gorm.DB
 }
-
+/*
 func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 	var query = "SELECT name FROM contentType WHERE id=" + id
 	fmt.Println(query)
@@ -134,6 +131,7 @@ func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
 	return nil
 }
 
-func NewContentTypeRepositoryDb(db *sql.DB) ContentTypeRepositoryDb {
+func NewContentTypeRepositoryDb(db *gorm.DB) ContentTypeRepositoryDb {
 	return ContentTypeRepositoryDb{db}
 }
+*/
