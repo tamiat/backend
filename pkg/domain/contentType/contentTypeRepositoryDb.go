@@ -1,16 +1,14 @@
 package contentType
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
+	"gorm.io/gorm"
 )
 
 type ContentTypeRepositoryDb struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
+/*func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 	var query = "SELECT name FROM contentType WHERE id=" + id
 	fmt.Println(query)
 	row := r.db.QueryRow(query)
@@ -131,8 +129,8 @@ func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
 		return errors.New("Unexpected database error")
 	}
 	return nil
-}
+}*/
 
-func NewContentTypeRepositoryDb(db *sql.DB) ContentTypeRepositoryDb {
+func NewContentTypeRepositoryDb(db *gorm.DB) ContentTypeRepositoryDb {
 	return ContentTypeRepositoryDb{db}
 }
