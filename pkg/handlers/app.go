@@ -3,16 +3,20 @@ package handlers
 //this file is used to handle all business logic
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
-	"github.com/tamiat/backend/pkg/domain/content"
-	"github.com/tamiat/backend/pkg/domain/contentType"
-	"github.com/tamiat/backend/pkg/service"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
+	"github.com/tamiat/backend/pkg/domain/content"
+	"github.com/tamiat/backend/pkg/domain/user"
+	"github.com/tamiat/backend/pkg/middleware"
+	"github.com/tamiat/backend/pkg/service"
 )
 
 func Start() {
@@ -21,51 +25,50 @@ func Start() {
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 	dbConnection := getDbConnetion()
-	ch := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
-	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection))}
+	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
+	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection))}
+	//ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection))}
+	/*
+		router.Path("/api/v1/contentType").
+			HandlerFunc(ct.createContentType).Methods(http.MethodPost)
 
-	router.HandleFunc("/api/v1/contents/", ch.readAllContents).Methods(http.MethodGet)
+		router.Path("/api/v1/contentType").Queries("id", "{id}").
+			HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
 
+		router.Path("/api/v1/contentType/renamecol").Queries("id", "{id}").
+			HandlerFunc(ct.updateColName).Methods(http.MethodPut)
+
+		router.Path("/api/v1/contentType/addcol").Queries("id", "{id}").
+			HandlerFunc(ct.addCol).Methods(http.MethodPut)
+
+		router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
+			HandlerFunc(ct.deleteCol).Methods(http.MethodPut)
+	*/
+	router.HandleFunc("/api/v1/contents/", middleware.TokenVerifyMiddleWare(contentHandler.readAllContents)).Methods(http.MethodGet)
 	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.readContent).Methods(http.MethodGet)
-
+		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.readContent)).Methods(http.MethodGet)
 	router.Path("/api/v1/contents").Queries("id", "{id}").
-		HandlerFunc(ch.readRangeOfContents).Methods(http.MethodGet)
-
-	router.HandleFunc("/api/v1/content/", ch.createContent).Methods(http.MethodPost)
-
+		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.readRangeOfContents)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/content/", middleware.TokenVerifyMiddleWare(contentHandler.createContent)).Methods(http.MethodPost)
 	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.deleteContent).Methods(http.MethodDelete)
-
+		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.deleteContent)).Methods(http.MethodDelete)
 	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.updateContent).Methods(http.MethodPut)
+		HandlerFunc(middleware.TokenVerifyMiddleWare(contentHandler.updateContent)).Methods(http.MethodPut)
 
-	router.Path("/api/v1/contentType").
-		HandlerFunc(ct.createContentType).Methods(http.MethodPost)
-
-	router.Path("/api/v1/contentType").Queries("id", "{id}").
-		HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
-
-	router.Path("/api/v1/contentType/renamecol").Queries("id", "{id}").
-		HandlerFunc(ct.updateColName).Methods(http.MethodPut)
-
-	router.Path("/api/v1/contentType/addcol").Queries("id", "{id}").
-		HandlerFunc(ct.addCol).Methods(http.MethodPut)
-
-	router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
-		HandlerFunc(ct.deleteCol).Methods(http.MethodPut)
+	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
+	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
 
 	log.Fatal(http.ListenAndServe("localhost:8080", handlers.CORS(headers, methods, origins)(router)))
 }
-
-func getDbConnetion() *sql.DB {
+func getDbConnetion() *gorm.DB {
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",
 		os.Getenv("HOST"),
 		os.Getenv("DBPORT"),
 		os.Getenv("DBNAME"),
 		os.Getenv("USER"),
 		os.Getenv("PASS"))
-	db, err := sql.Open("pgx", dataSourceName)
+	//db, err := sql.Open("pgx", dataSourceName)
+	db, err := gorm.Open(postgres.Open(dataSourceName), &gorm.Config{})
 	if err != nil {
 		log.Fatal(fmt.Sprintf("unable to conect to db"))
 		panic(err)
@@ -73,11 +76,11 @@ func getDbConnetion() *sql.DB {
 	log.Println("connected to db ")
 
 	//test connection
-	err = db.Ping()
+	/*err = db.Ping()
 	if err != nil {
 		log.Fatal("cannot ping db")
 		panic(err)
-	}
+	}*/
 	log.Println("pinged db")
 	return db
 }
