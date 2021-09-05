@@ -30,12 +30,18 @@ CREATE DATABSE cms;
  3. Environment variables:
  - open .bashrc file.
 - we will add 6 environment variables using the following format:
-PASS=< value for password> ; export PASS
-HOST=localhost ; export HOST
-DBNAME=cms ; export DBNAME // the same name of database that was created in postgres
-DBPORT=5432 ; export DBPORT
-PORT=8080 ; export PORT
-SECRET=< value for jwt secret > ; export SECRET
+PASS=< value for password> ; export PASS </br>
+
+HOST=localhost ; export HOST </br>
+
+DBNAME=cms ; export DBNAME // the same name of database that was created in postgres </br>
+
+DBPORT=5432 ; export DBPORT </br>
+
+PORT=8080 ; export PORT </br>
+
+SECRET=< value for jwt secret > ; export SECRET </br>
+
 
 then run this command in the project root directory:
 ```
