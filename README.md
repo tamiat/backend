@@ -67,12 +67,12 @@ source .profile
 - In mac:
 same instructions as linux but open .zprofile
 
-In windows:
+- In windows:
 follow the instructions in this link https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/ to add new env variable, and add this:
 ```
 C:\Users\<your_username>\go\bin
 ```
-then 
+then in the working directory of the project:
 ```
 cd pkg
 ```
