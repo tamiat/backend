@@ -29,7 +29,8 @@ CREATE DATABSE cms;
 
  3. Environment variables:
  - open .bashrc file.
-- we will add 6 environment variables using the following format:
+- we will add 6 environment variables using the following format: </br>
+
 PASS=< value for password> ; export PASS </br>
 
 HOST=localhost ; export HOST </br>
@@ -48,12 +49,28 @@ then run this command in the project root directory:
 source ~/.bashrc
 ```
 4. Install soda migration tool:
-use these commands in the project root directory to install soda:
+- In linux:
 ```
-go get -u -v -tags sqlite github.com/gobuffalo/pop/...
+cd ..
 ```
 ```
-go install -tags sqlite github.com/gobuffalo/pop/soda
+nano .profile
+```
+add this at the end of the file: <\br>
+
+```
+export PATH=$HOME/go/bin:$PATH
+```
+```
+source .profile
+```
+- In mac:
+same instructions as linux but open .zprofile
+
+In windows:
+follow the instructions in this link https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/ to add new env variable, and add this:
+```
+C:\Users\<your_username>\go\bin
 ```
 then 
 ```
