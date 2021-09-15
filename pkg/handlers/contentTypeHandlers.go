@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -40,7 +41,7 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 	}
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse("There is no content type name",http.StatusBadRequest))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrNoContentTypeName.Error(),http.StatusBadRequest))
 		return
 	}
 	col = col[0 : len(col)-1]
@@ -75,7 +76,7 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 	log.Println(id)
 	err := ch.service.DeleteContentType(id)
 	if err != nil {
-		if err.Error() == "content not found" {
+		if err == errs.ErrContentNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
 			return
@@ -90,6 +91,7 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 }
 
 func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ff")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	//regular expression to check if the string has numbers only	example: 1234
@@ -121,7 +123,7 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 	}
 	err = ch.service.UpdateColName(id, oldName, newName)
 	if err != nil {
-		if err.Error() == "content type not found" || err.Error() == "column not found"{
+		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
 			return
@@ -167,7 +169,7 @@ func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 	}
 	err = ch.service.AddCol(id, col)
 	if err != nil {
-		if err.Error() == "content type not found" {
+		if err == errs.ErrContentTypeNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
 			return
@@ -211,7 +213,7 @@ func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request)
 	}
 	err = ch.service.DeleteCol(id, col)
 	if err != nil {
-		if err.Error() == "content type not found" || err.Error() == "column not found" {
+		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
 			return

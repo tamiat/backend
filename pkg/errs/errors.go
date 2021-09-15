@@ -2,19 +2,23 @@ package errs
 
 import "errors"
 
-var ErrDb = errors.New("unexpected database error")
-var ErrContentTypeNotFound = errors.New("content type not found")
-var ErrContentNotFound = errors.New("content not found")
-var ErrEmailMissing = errors.New("email is missing")
-var ErrInvalidPassword = errors.New("invalid password")
-var ErrInvalidEmail = errors.New("invalid email")
-var ErrServerErr = errors.New("internal server error")
-var ErrTokenErr = errors.New("can't generate token")
-var ErrContentWithStatusOk = errors.New("there is no content found")
-var ErrContentParams = errors.New("parameter value is not valid")
-var ErrUnexpected = errors.New("unexpected error")
-var ErrInvalidToken = errors.New("invalid token")
-var ErrColumnName = errors.New("no specific column name was sent")
+var(
+	ErrDb = errors.New("unexpected database error")
+	ErrContentTypeNotFound = errors.New("content type not found")
+	ErrContentNotFound = errors.New("content not found")
+	ErrEmailMissing = errors.New("email is missing")
+	ErrInvalidPassword = errors.New("invalid password")
+	ErrInvalidEmail = errors.New("invalid email")
+	ErrServerErr = errors.New("internal server error")
+	ErrTokenErr = errors.New("can't generate token")
+	ErrContentWithStatusOk = errors.New("there is no content found")
+	ErrContentParams = errors.New("parameter value is not valid")
+	ErrUnexpected = errors.New("unexpected error")
+	ErrInvalidToken = errors.New("invalid token")
+	ErrColumnName = errors.New("no specific column name was sent")
+	ErrColNotFound = errors.New("column not found")
+	ErrNoContentTypeName = errors.New("there is no content type name")
+)
 
 type Response struct {
 	Message string `json:"message"`

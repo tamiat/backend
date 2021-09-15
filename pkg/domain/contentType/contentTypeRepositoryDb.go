@@ -1,67 +1,56 @@
 package contentType
 
 import (
+	"database/sql"
+
 	"gorm.io/gorm"
+
+	"github.com/tamiat/backend/pkg/errs"
 )
 
 type ContentTypeRepositoryDb struct {
-	db *gorm.DB
+	db    *gorm.DB
+	sqlDB *sql.DB
 }
 
-/*func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
-	var query = "SELECT name FROM contentType WHERE id=" + id
-	fmt.Println(query)
-	row := r.db.QueryRow(query)
+func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 	var name string
+	row := r.db.Table("contenttype").Select("name").Where("id= ?", id).Row()
 	err := row.Scan(&name)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return "", errors.New("content type not found")
-		} else {
-			return "", errors.New("Unexpected database error")
-		}
+		return "", errs.ErrContentTypeNotFound
 	}
 	return name, nil
 }
 
 func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) error {
-	query := "SELECT COUNT(*) FROM information_schema.columns WHERE table_name= '" + tableName + "' and column_name='" + colName + "'"
-	row := r.db.QueryRow(query)
 	var numOfCols int
+	row :=r.sqlDB.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_name=$1 and column_name=$2", tableName, colName)
 	err := row.Scan(&numOfCols)
-	fmt.Println(numOfCols, colName, query)
 	if err != nil {
-		return errors.New("Unexpected database error")
+		return errs.ErrDb
 	}
 	if numOfCols == 0 {
-		return errors.New("column not found")
+		return errs.ErrColNotFound
 	}
 	return nil
 }
 
 func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
-	var query = "INSERT INTO contentType (name) VALUES ('" + n + "')"
-	_, err := r.db.Exec(query)
+	_, err := r.sqlDB.Exec("INSERT INTO contentType (name) VALUES ($1)", n)
 	if err != nil {
-		return "", errors.New("Unexpected database error")
+		return "", errs.ErrDb
 	}
-	query = "CREATE TABLE " + n + " ( " + cols + " )"
-	_, err = r.db.Exec(query)
+	_, err = r.sqlDB.Exec("CREATE TABLE " + n + "(" + cols + ")")
 	if err != nil {
-		return "", errors.New("Unexpected database error")
+		return "", errs.ErrDb
 	}
-	query = `SELECT currval(pg_get_serial_sequence('contentType','id'));`
-	row := r.db.QueryRow(query)
 	var id string
-	switch err := row.Scan(&id); err {
-	case sql.ErrNoRows:
-		return "", errors.New("Unexpected database error")
-	case nil:
-		return id, nil
-	default:
-		fmt.Println(id)
-		panic(err)
+	err = r.sqlDB.QueryRow("SELECT currval(pg_get_serial_sequence('contentType','id'));").Scan(&id)
+	if err != nil {
+		return "", errs.ErrDb
 	}
+	return id, nil
 }
 
 func (r ContentTypeRepositoryDb) DeleteById(id string) error {
@@ -69,15 +58,13 @@ func (r ContentTypeRepositoryDb) DeleteById(id string) error {
 	if err != nil {
 		return err
 	}
-	query := "DROP TABLE " + name
-	_, err = r.db.Exec(query)
+	_, err = r.sqlDB.Exec(`DELETE FROM contentType WHERE id= $1` , id)
 	if err != nil {
-		return errors.New("Unexpected database error")
+		return err
 	}
-	query = "DELETE FROM contentType" + " WHERE id=" + id
-	_, err = r.db.Exec(query)
+	_, err = r.sqlDB.Exec("DROP TABLE " + name)
 	if err != nil {
-		return errors.New("Unexpected database error")
+		return err
 	}
 	return nil
 }
@@ -91,10 +78,10 @@ func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newNam
 	if err != nil {
 		return err
 	}
-	query := "ALTER TABLE " + name + " RENAME COLUMN " + oldName + " TO " + newName
-	_, err = r.db.Exec(query)
+	query := `ALTER TABLE ` + name + ` RENAME COLUMN ` + oldName + ` TO ` + newName
+	_, err = r.sqlDB.Exec(query)
 	if err != nil {
-		return errors.New("Unexpected database error")
+		return errs.ErrDb
 	}
 	return nil
 }
@@ -104,11 +91,10 @@ func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
 	if err != nil {
 		return err
 	}
-	query := "ALTER TABLE " + name + " ADD COLUMN " + col
-	fmt.Println(query)
-	_, err = r.db.Exec(query)
+	query := `ALTER TABLE ` + name + ` ADD COLUMN ` + col
+	_, err = r.sqlDB.Exec(query)
 	if err != nil {
-		return errors.New("Unexpected database error")
+		return errs.ErrDb
 	}
 	return nil
 }
@@ -122,15 +108,13 @@ func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
 	if err != nil {
 		return err
 	}
-	query := "ALTER TABLE " + name + " DROP COLUMN " + col
-	fmt.Println(query)
-	_, err = r.db.Exec(query)
-	if err != nil {
-		return errors.New("Unexpected database error")
+	newErr := r.db.Raw("ALTER TABLE ? DROP COLUMN ?", name, col)
+	if newErr != nil {
+		return errs.ErrDb
 	}
 	return nil
-}*/
+}
 
-func NewContentTypeRepositoryDb(db *gorm.DB) ContentTypeRepositoryDb {
-	return ContentTypeRepositoryDb{db}
+func NewContentTypeRepositoryDb(gormDb *gorm.DB, sqlDB *sql.DB) ContentTypeRepositoryDb {
+	return ContentTypeRepositoryDb{gormDb, sqlDB}
 }
