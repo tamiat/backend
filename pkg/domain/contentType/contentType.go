@@ -1,5 +1,10 @@
 package contentType
 
+type ContentType struct {
+	ID    string    `json:"id"`
+	Name string `json:"name"`
+}
+
 type ContentTypeRepository interface {
 
 	//TODO 1
