@@ -17,7 +17,6 @@ import (
 	"github.com/tamiat/backend/pkg/domain/content"
 	"github.com/tamiat/backend/pkg/domain/contentType"
 	"github.com/tamiat/backend/pkg/domain/role"
-	_type "github.com/tamiat/backend/pkg/domain/type"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
