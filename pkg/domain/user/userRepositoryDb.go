@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/harranali/authority"
 	"gorm.io/gorm"
 
@@ -22,7 +24,14 @@ func (r UserRepositoryDb) Login(userObj User) (string, error) {
 
 func (r UserRepositoryDb) Signup(user User) (int, error) {
 	if err := r.db.Select("email", "password").Create(&user).Error; err != nil {
+		fmt.Println(err)
 		return -1, errs.ErrDb
+	}
+	fmt.Println(user.Role)
+	err := r.auth.AssignRole(uint(user.ID),user.Role)
+	if err != nil {
+		fmt.Println(err)
+		return user.ID, err
 	}
 	return user.ID, nil
 }

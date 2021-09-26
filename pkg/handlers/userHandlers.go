@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/mail"
 
@@ -26,6 +27,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	//extracting usr obj
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
+	fmt.Println(userObj.Role)
 	//validating email and password
 	err:=validateEmailAndPassword(userObj)
 	if err!=nil{
