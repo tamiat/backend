@@ -16,6 +16,7 @@ import (
 
 	"github.com/tamiat/backend/pkg/domain/content"
 	"github.com/tamiat/backend/pkg/domain/contentType"
+	"github.com/tamiat/backend/pkg/domain/role"
 	_type "github.com/tamiat/backend/pkg/domain/type"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/middleware"
@@ -32,6 +33,7 @@ func Start() {
 	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection))}
 	typeHandler := TypeHandlers{service.NewTypeService(_type.NewTypeRepositoryDb(sqlDBConnection))}
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection))}
+	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(dbConnection, sqlDBConnection))}
 
 		router.Path("/api/v1/contentType").
 			HandlerFunc(ct.createContentType).Methods(http.MethodPost)
@@ -54,6 +56,11 @@ func Start() {
 	router.HandleFunc("/api/v1/types/{id:[0-9]+}", typeHandler.Update).Methods(http.MethodPut)
 	router.HandleFunc("/api/v1/types/{id:[0-9]+}", typeHandler.Delete).Methods(http.MethodDelete)
 
+	//roles endpoints
+	router.HandleFunc("/api/v1/roles", roleHandler.Create).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/roles", roleHandler.Read).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/roles/{id:[0-9]+}", roleHandler.Delete).Methods(http.MethodDelete)
+
 
 	router.HandleFunc("/api/v1/contents/", middleware.TokenVerifyMiddleWare(contentHandler.readAllContents)).Methods(http.MethodGet)
 	router.Path("/api/v1/content").Queries("id", "{id}").
@@ -69,7 +76,7 @@ func Start() {
 	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
 	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
 
-	log.Fatal(http.ListenAndServe("localhost:8000", handlers.CORS(headers, methods, origins)(router)))
+	log.Fatal(http.ListenAndServe("localhost:8080", handlers.CORS(headers, methods, origins)(router)))
 }
 func getDbConnetion() (*gorm.DB, *sql.DB) {
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",

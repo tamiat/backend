@@ -19,7 +19,7 @@ var(
 	ErrColNotFound = errors.New("column not found")
 	ErrNoContentTypeName = errors.New("there is no content type name")
 	ErrDuplicateValue = errors.New("this value already exists")
-	ErrNoTypesFound = errors.New("no types found")
+	ErrNoRolesFound = errors.New("no types found")
 	ErrNoRowsFound = errors.New("no values found")
 )
 
