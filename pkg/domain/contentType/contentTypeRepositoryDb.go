@@ -39,8 +39,14 @@ func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) e
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
-	_, err := r.sqlDB.Exec("INSERT INTO contentType (name) VALUES ($1)", n)
+func (r ContentTypeRepositoryDb) Create(userId, n, cols string) (string, error) {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	if !role1 && !role2 {
+		return "", errs.ErrUnauthorized
+	}
+	_, err = r.sqlDB.Exec("INSERT INTO contentType (name) VALUES ($1)", n)
 	if err != nil {
 		return "", errs.ErrDb
 	}
@@ -57,8 +63,8 @@ func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
 }
 
 func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error {
-	intUserId, err :=strconv.Atoi(userId)
-	role, err := r.auth.CheckRole(uint(intUserId),"super admin")
+	intUserId, err := strconv.Atoi(userId)
+	role, err := r.auth.CheckRole(uint(intUserId), "super admin")
 	if !role {
 		return errs.ErrUnauthorized
 	}

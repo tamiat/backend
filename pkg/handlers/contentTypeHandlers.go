@@ -21,6 +21,8 @@ type ContentTypeHandlers struct {
 
 func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	userId := params["userId"]
 	var newContentType interface{} // The interface where we will save the converted JSON data.
 	buffer, err := ioutil.ReadAll(r.Body)
 	err = r.Body.Close()
@@ -46,8 +48,13 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 	}
 	col = col[0 : len(col)-1]
 	var id string
-	id, err = ch.service.CreateContentType(name, col)
+	id, err = ch.service.CreateContentType(userId, name, col)
 	if err != nil {
+		if err == errs.ErrUnauthorized {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
