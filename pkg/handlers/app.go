@@ -91,13 +91,6 @@ func getDbConnetion() (*gorm.DB, *sql.DB) {
 		panic(err)
 	}
 	log.Println("connected to db ")
-
-	//test connection
-	/*err = db.Ping()
-	if err != nil {
-		log.Fatal("cannot ping db")
-		panic(err)
-	}*/
 	log.Println("pinged db")
 	return db, sqlDB
 }
