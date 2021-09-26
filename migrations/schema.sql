@@ -68,43 +68,6 @@ CREATE TABLE public.schema_migration (
 ALTER TABLE public.schema_migration OWNER TO postgres;
 
 --
--- Name: types; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.types (
-    id integer NOT NULL,
-    name character varying(70) NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL
-);
-
-
-ALTER TABLE public.types OWNER TO postgres;
-
---
--- Name: types_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.types_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.types_id_seq OWNER TO postgres;
-
---
--- Name: types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.types_id_seq OWNED BY public.types.id;
-
-
---
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -113,8 +76,7 @@ CREATE TABLE public.users (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     email text NOT NULL,
-    password text NOT NULL,
-    type_id integer NOT NULL
+    password text NOT NULL
 );
 
 
@@ -150,13 +112,6 @@ ALTER TABLE ONLY public.contenttype ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- Name: types id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.types ALTER COLUMN id SET DEFAULT nextval('public.types_id_seq'::regclass);
-
-
---
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -169,22 +124,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.contenttype
     ADD CONSTRAINT contenttype_pkey PRIMARY KEY (id);
-
-
---
--- Name: types types_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.types
-    ADD CONSTRAINT types_name_key UNIQUE (name);
-
-
---
--- Name: types types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.types
-    ADD CONSTRAINT types_pkey PRIMARY KEY (id);
 
 
 --
@@ -208,14 +147,6 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE UNIQUE INDEX schema_migration_version_idx ON public.schema_migration USING btree (version);
-
-
---
--- Name: users users_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_type_id_fkey FOREIGN KEY (type_id) REFERENCES public.types(id) ON DELETE CASCADE;
 
 
 --
