@@ -41,13 +41,13 @@ func Start() {
 		router.Path("/api/v1/contentType/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
 			HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
 
-		router.Path("/api/v1/contentType/renamecol").Queries("id", "{id}").
+		router.Path("/api/v1/contentType/renamecol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
 			HandlerFunc(ct.updateColName).Methods(http.MethodPut)
 
-		router.Path("/api/v1/contentType/addcol").Queries("id", "{id}").
+		router.Path("/api/v1/contentType/addcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
 			HandlerFunc(ct.addCol).Methods(http.MethodPut)
 
-		router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
+		router.Path("/api/v1/contentType/delcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
 			HandlerFunc(ct.deleteCol).Methods(http.MethodPut)
 
 

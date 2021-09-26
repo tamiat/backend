@@ -86,8 +86,15 @@ func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error 
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newName string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) UpdateColName(userId, contentTypeId, oldName, newName string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	role3, err := r.auth.CheckRole(uint(intUserId), "others")
+	if !role1 && !role2 && !role3 {
+		return errs.ErrUnauthorized
+	}
+	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -103,8 +110,15 @@ func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newNam
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) AddCol(userId, contentTypeId, col string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	role3, err := r.auth.CheckRole(uint(intUserId), "others")
+	if !role1 && !role2 && !role3 {
+		return errs.ErrUnauthorized
+	}
+	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -116,8 +130,15 @@ func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) DeleteCol(userId, contentTypeId, col string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	role3, err := r.auth.CheckRole(uint(intUserId), "others")
+	if !role1 && !role2 && !role3 {
+		return errs.ErrUnauthorized
+	}
+	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
 		return err
 	}

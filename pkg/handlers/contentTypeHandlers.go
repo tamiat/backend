@@ -2,11 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -95,18 +92,10 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 }
 
 func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ff")
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	//regular expression to check if the string has numbers only	example: 1234
-	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
-	if !pattern1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
-		return
-	}
-	id := vars["id"]
-	log.Println(id)
+	params := mux.Vars(r)
+	userId := params["userId"]
+	contentTypeId := params["contentTypeId"]
 	var newContentType interface{} // The interface where we will save the converted JSON data.
 	buffer, err := ioutil.ReadAll(r.Body)
 	err = r.Body.Close()
@@ -125,11 +114,15 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
-	err = ch.service.UpdateColName(id, oldName, newName)
+	err = ch.service.UpdateColName(userId, contentTypeId, oldName, newName)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			return
+		} else if err == errs.ErrUnauthorized {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -143,15 +136,9 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 
 func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	//regular expression to check if the string has numbers only	example: 1234
-	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
-	if !pattern1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
-		return
-	}
-	id := vars["id"]
+	params := mux.Vars(r)
+	userId := params["userId"]
+	contentTypeId := params["contentTypeId"]
 	var newContentType interface{} // The interface where we will save the converted JSON data.
 	buffer, err := ioutil.ReadAll(r.Body)
 	err = r.Body.Close()
@@ -171,11 +158,15 @@ func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
-	err = ch.service.AddCol(id, col)
+	err = ch.service.AddCol(userId, contentTypeId, col)
 	if err != nil {
 		if err == errs.ErrContentTypeNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			return
+		} else if err == errs.ErrUnauthorized {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -189,15 +180,9 @@ func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 
 func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	//regular expression to check if the string has numbers only	example: 1234
-	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
-	if !pattern1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
-		return
-	}
-	id := vars["id"]
+	params := mux.Vars(r)
+	userId := params["userId"]
+	contentTypeId := params["contentTypeId"]
 	var newContentType interface{} // The interface where we will save the converted JSON data.
 	buffer, err := ioutil.ReadAll(r.Body)
 	err = r.Body.Close()
@@ -215,11 +200,15 @@ func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request)
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
-	err = ch.service.DeleteCol(id, col)
+	err = ch.service.DeleteCol(userId, contentTypeId, col)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			return
+		} else if err == errs.ErrUnauthorized {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)

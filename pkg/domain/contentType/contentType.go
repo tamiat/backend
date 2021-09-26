@@ -12,7 +12,7 @@ type ContentTypeRepository interface {
 	isColExists(string, string) error
 	Create(string, string, string) (string, error)
 	DeleteById(string, string) error
-	UpdateColName(string, string, string) error
-	AddCol(string, string) error
-	DeleteCol(string, string) error
+	UpdateColName(string, string, string, string) error
+	AddCol(string, string, string) error
+	DeleteCol(string, string, string) error
 }
