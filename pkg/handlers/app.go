@@ -16,6 +16,7 @@ import (
 
 	"github.com/tamiat/backend/pkg/domain/content"
 	"github.com/tamiat/backend/pkg/domain/contentType"
+	_type "github.com/tamiat/backend/pkg/domain/type"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
@@ -29,6 +30,7 @@ func Start() {
 	dbConnection, sqlDBConnection := getDbConnetion()
 	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
 	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection))}
+	typeHandler := TypeHandlers{service.NewTypeService(_type.NewTypeRepositoryDb(sqlDBConnection))}
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection))}
 
 		router.Path("/api/v1/contentType").
@@ -45,6 +47,13 @@ func Start() {
 
 		router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
 			HandlerFunc(ct.deleteCol).Methods(http.MethodPut)
+
+	//typess endpoints
+	router.HandleFunc("/api/v1/types", typeHandler.Create).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/types", typeHandler.Read).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/types/{id:[0-9]+}", typeHandler.Update).Methods(http.MethodPut)
+	router.HandleFunc("/api/v1/types/{id:[0-9]+}", typeHandler.Delete).Methods(http.MethodDelete)
+
 
 	router.HandleFunc("/api/v1/contents/", middleware.TokenVerifyMiddleWare(contentHandler.readAllContents)).Methods(http.MethodGet)
 	router.Path("/api/v1/content").Queries("id", "{id}").
