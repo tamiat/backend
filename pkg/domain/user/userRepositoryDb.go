@@ -27,8 +27,7 @@ func (r UserRepositoryDb) Signup(user User) (int, error) {
 		fmt.Println(err)
 		return -1, errs.ErrDb
 	}
-	fmt.Println(user.Role)
-	err := r.auth.AssignRole(uint(user.ID),user.Role)
+	err := r.auth.AssignRole(uint(user.ID), user.Role)
 	if err != nil {
 		fmt.Println(err)
 		return user.ID, err
