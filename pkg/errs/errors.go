@@ -21,6 +21,7 @@ var(
 	ErrDuplicateValue = errors.New("this value already exists")
 	ErrNoRolesFound = errors.New("no types found")
 	ErrNoRowsFound = errors.New("no values found")
+	ErrUnauthorized = errors.New("you are unauthorized")
 )
 
 type Response struct {
