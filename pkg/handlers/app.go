@@ -30,7 +30,6 @@ func Start() {
 	dbConnection, sqlDBConnection := getDbConnetion()
 	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
 	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection))}
-	typeHandler := TypeHandlers{service.NewTypeService(_type.NewTypeRepositoryDb(sqlDBConnection))}
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection))}
 	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(dbConnection, sqlDBConnection))}
 
@@ -49,11 +48,6 @@ func Start() {
 		router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
 			HandlerFunc(ct.deleteCol).Methods(http.MethodPut)
 
-	//typess endpoints
-	router.HandleFunc("/api/v1/types", typeHandler.Create).Methods(http.MethodPost)
-	router.HandleFunc("/api/v1/types", typeHandler.Read).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/types/{id:[0-9]+}", typeHandler.Update).Methods(http.MethodPut)
-	router.HandleFunc("/api/v1/types/{id:[0-9]+}", typeHandler.Delete).Methods(http.MethodDelete)
 
 	//roles endpoints
 	router.HandleFunc("/api/v1/roles", roleHandler.Create).Methods(http.MethodPost)
