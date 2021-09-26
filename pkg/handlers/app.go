@@ -33,7 +33,7 @@ func Start() {
 	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
 	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection,auth))}
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection))}
-	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(dbConnection, sqlDBConnection))}
+	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection ,auth))}
 
 		router.Path("/api/v1/contentType").
 			HandlerFunc(ct.createContentType).Methods(http.MethodPost)
