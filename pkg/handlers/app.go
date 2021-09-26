@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/harranali/authority"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -28,8 +29,9 @@ func Start() {
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 	dbConnection, sqlDBConnection := getDbConnetion()
+	auth := initAuthority(dbConnection)
 	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
-	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection))}
+	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection,auth))}
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection))}
 	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(dbConnection, sqlDBConnection))}
 
@@ -87,4 +89,12 @@ func getDbConnetion() (*gorm.DB, *sql.DB) {
 	log.Println("connected to db ")
 	log.Println("pinged db")
 	return db, sqlDB
+}
+
+// initiate authority
+func initAuthority(db *gorm.DB) *authority.Authority{
+	return authority.New(authority.Options{
+		TablesPrefix: "authority_",
+		DB:           db,
+	})
 }

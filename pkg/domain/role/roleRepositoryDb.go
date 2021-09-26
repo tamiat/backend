@@ -4,13 +4,11 @@ import (
 	"database/sql"
 
 	"github.com/harranali/authority"
-	"gorm.io/gorm"
 
 	"github.com/tamiat/backend/pkg/errs"
 )
 
 type RoleRepositoryDb struct {
-	gormDb *gorm.DB
 	sqlDb  *sql.DB
 	auth   *authority.Authority
 }
@@ -58,9 +56,6 @@ func (r RoleRepositoryDb) Delete(roleId int) error {
 	return r.auth.DeleteRole(name)
 }
 
-func NewRoleRepositoryDb(gormDb *gorm.DB, sqlDb *sql.DB) RoleRepositoryDb {
-	return RoleRepositoryDb{gormDb, sqlDb, authority.New(authority.Options{
-		TablesPrefix: "authority_",
-		DB:           gormDb,
-	})}
+func NewRoleRepositoryDb(sqlDb *sql.DB, auth *authority.Authority) RoleRepositoryDb {
+	return RoleRepositoryDb{sqlDb, auth}
 }

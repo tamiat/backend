@@ -22,6 +22,7 @@ type JWT struct {
 }
 
 func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
 	//extracting usr obj
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
@@ -53,6 +54,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(userObj)
 }
 func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
 	//validating email and password
