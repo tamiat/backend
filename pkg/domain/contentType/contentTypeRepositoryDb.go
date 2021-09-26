@@ -2,7 +2,9 @@ package contentType
 
 import (
 	"database/sql"
+	"strconv"
 
+	"github.com/harranali/authority"
 	"gorm.io/gorm"
 
 	"github.com/tamiat/backend/pkg/errs"
@@ -11,6 +13,7 @@ import (
 type ContentTypeRepositoryDb struct {
 	db    *gorm.DB
 	sqlDB *sql.DB
+	auth  *authority.Authority
 }
 
 func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
@@ -25,7 +28,7 @@ func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 
 func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) error {
 	var numOfCols int
-	row :=r.sqlDB.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_name=$1 and column_name=$2", tableName, colName)
+	row := r.sqlDB.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_name=$1 and column_name=$2", tableName, colName)
 	err := row.Scan(&numOfCols)
 	if err != nil {
 		return errs.ErrDb
@@ -53,12 +56,20 @@ func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
 	return id, nil
 }
 
-func (r ContentTypeRepositoryDb) DeleteById(id string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error {
+	intUserId, err :=strconv.Atoi(userId)
+	role, err := r.auth.CheckRole(uint(intUserId),"super admin")
+	if !role {
+		return errs.ErrUnauthorized
+	}
 	if err != nil {
 		return err
 	}
-	_, err = r.sqlDB.Exec(`DELETE FROM contentType WHERE id= $1` , id)
+	name, err := r.isTableExists(contentTypeId)
+	if err != nil {
+		return err
+	}
+	_, err = r.sqlDB.Exec(`DELETE FROM contentType WHERE id= $1`, contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -115,6 +126,9 @@ func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
 	return nil
 }
 
-func NewContentTypeRepositoryDb(gormDb *gorm.DB, sqlDB *sql.DB) ContentTypeRepositoryDb {
-	return ContentTypeRepositoryDb{gormDb, sqlDB}
+func NewContentTypeRepositoryDb(gormDb *gorm.DB, sqlDB *sql.DB, auth *authority.Authority) ContentTypeRepositoryDb {
+	return ContentTypeRepositoryDb{gormDb, sqlDB, authority.New(authority.Options{
+		TablesPrefix: "authority_",
+		DB:           gormDb,
+	})}
 }

@@ -6,7 +6,7 @@ import (
 
 type ContentTypeService interface {
 	CreateContentType(string, string) (string, error)
-	DeleteContentType(string) error
+	DeleteContentType(string, string) error
 	UpdateColName(string, string, string) error
 	AddCol(string, string) error
 	DeleteCol(string, string) error
@@ -20,8 +20,8 @@ func (s DefaultContentTypeService) CreateContentType(name string, cols string) (
 	return s.repo.Create(name, cols)
 }
 
-func (s DefaultContentTypeService) DeleteContentType(id string) error {
-	return s.repo.DeleteById(id)
+func (s DefaultContentTypeService) DeleteContentType(userId, contentTypeId string) error {
+	return s.repo.DeleteById(userId, contentTypeId)
 }
 
 func (s DefaultContentTypeService) UpdateColName(id string, oldName string, newName string) error {

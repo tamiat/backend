@@ -32,13 +32,13 @@ func Start() {
 	auth := initAuthority(dbConnection)
 	contentHandler := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb(dbConnection))}
 	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection,auth))}
-	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection))}
+	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection, auth))}
 	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection ,auth))}
 
 		router.Path("/api/v1/contentType").
 			HandlerFunc(ct.createContentType).Methods(http.MethodPost)
 
-		router.Path("/api/v1/contentType").Queries("id", "{id}").
+		router.Path("/api/v1/contentType/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
 			HandlerFunc(ct.deleteContentType).Methods(http.MethodDelete)
 
 		router.Path("/api/v1/contentType/renamecol").Queries("id", "{id}").

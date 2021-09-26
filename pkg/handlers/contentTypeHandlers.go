@@ -64,21 +64,18 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 
 func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	//regular expression to check if the string has numbers only	example: 1234
-	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
-	if !pattern1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrContentParams.Error(),http.StatusBadRequest))
-		return
-	}
-	id := vars["id"]
-	log.Println(id)
-	err := ch.service.DeleteContentType(id)
+	params := mux.Vars(r)
+	userId := params["userId"]
+	contentTypeId := params["contentTypeId"]
+	err := ch.service.DeleteContentType(userId,contentTypeId)
 	if err != nil {
 		if err == errs.ErrContentNotFound {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			return
+		} else if err == errs.ErrUnauthorized {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
