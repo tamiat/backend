@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e38ced0b-cc8a-4570-9146-6dc50a1c3773",
+		"_postman_id": "679e3e4e-1fee-4341-8fa3-d82795100fe5",
 		"name": "backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -15,7 +15,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\" : \"y\",\n    \"id\": \"SERIAL PRIMARY KEY\",\n    \"title\": \"VARCHAR(100) NOT NULL\"\n}",
+							"raw": "{\n    \"name\" : \"x\",\n    \"id\": \"SERIAL PRIMARY KEY\",\n    \"title\": \"VARCHAR(100) NOT NULL\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -23,7 +23,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/contentType",
+							"raw": "http://localhost:8080/api/v1/contentType/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -32,7 +32,8 @@
 							"path": [
 								"api",
 								"v1",
-								"contentType"
+								"contentType",
+								"3"
 							]
 						}
 					},
@@ -44,7 +45,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/contentType?id=1",
+							"raw": "http://localhost:8080/api/v1/contentType/3/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -53,13 +54,9 @@
 							"path": [
 								"api",
 								"v1",
-								"contentType"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								}
+								"contentType",
+								"3",
+								"1"
 							]
 						}
 					},
@@ -80,7 +77,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/contentType/renamecol?id=2",
+							"raw": "http://localhost:8080/api/v1/contentType/renamecol/3/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -90,13 +87,9 @@
 								"api",
 								"v1",
 								"contentType",
-								"renamecol"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "2"
-								}
+								"renamecol",
+								"3",
+								"2"
 							]
 						}
 					},
@@ -117,7 +110,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/contentType/addcol?id=2",
+							"raw": "http://localhost:8080/api/v1/contentType/addcol/3/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -127,13 +120,9 @@
 								"api",
 								"v1",
 								"contentType",
-								"addcol"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "2"
-								}
+								"addcol",
+								"3",
+								"2"
 							]
 						}
 					},
@@ -154,7 +143,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/contentType/delcol?id=2",
+							"raw": "http://localhost:8080/api/v1/contentType/delcol/3/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -164,13 +153,9 @@
 								"api",
 								"v1",
 								"contentType",
-								"delcol"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "2"
-								}
+								"delcol",
+								"3",
+								"2"
 							]
 						}
 					},
@@ -218,7 +203,12 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\":\"name@gmail.com\",\n    \"password\":\"0387573665\"\n}"
+							"raw": "{\n    \"email\":\"naaasdasdasaasdasdasasadasdaasdae@gmail.com\",\n    \"password\":\"0387573665\",\n    \"role\" : \"others\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/v1/signup",
@@ -436,7 +426,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\" : \"o\"\n}",
+							"raw": "{\n    \"name\" : \"others\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
