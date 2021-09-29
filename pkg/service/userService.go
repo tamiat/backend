@@ -10,6 +10,7 @@ type UserService interface {
 	InsertOTP(user.User)error
 	VerifyEmail(user.User)error
 	ReadOTP(user.User)(string,error)
+	UpdateEmailStatus(user.User)error
 
 }
 
@@ -32,6 +33,9 @@ func (s DefaultUserService )VerifyEmail(user user.User) error {
 }
 func (s DefaultUserService )ReadOTP(user user.User) (string,error) {
 	return s.repo.ReadOTP(user)
+}
+func (s DefaultUserService )UpdateEmailStatus(user user.User) error {
+	return s.repo.UpdateEmailStatus(user)
 }
 func NewUserService(repository user.UserRepository) DefaultUserService {
 	return DefaultUserService{repo: repository}
