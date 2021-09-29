@@ -59,6 +59,7 @@ func Start() {
 
 	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
 	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
+	router.HandleFunc("/api/v1/verifyEmail", usertHandler.VerifyEmail).Queries("id", "{id}").Methods("POST")
 
 	log.Fatal(http.ListenAndServe("localhost:8000", handlers.CORS(headers, methods, origins)(router)))
 }
