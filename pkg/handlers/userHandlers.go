@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/mail"
 	"regexp"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -128,14 +129,17 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	id := vars["id"]
-	userObj,err:=receiver.service.
-	password := userObj.Password
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	var userObj user.User
+	intId, err := strconv.Atoi(id)
+	userObj.ID = intId
+	hashedOPT,err:=receiver.service.ReadOPT(userObj)
+	err = bcrypt.CompareHashAndPassword([]byte(hashedOPT), []byte(opt))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidPassword.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 }
 func valid(email string) bool {
 	_, err := mail.ParseAddress(email)
