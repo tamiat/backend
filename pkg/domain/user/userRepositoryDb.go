@@ -31,20 +31,19 @@ func (r UserRepositoryDb) InsertOTP(user User) error {
 	}
 	return nil
 }
-
+func (r UserRepositoryDb) ReadOPT(user User) (string,error) {
+	if err:= r.db.First(&user, user.ID).Error; err != nil {
+		return "",err
+	}
+	return user.Otp,nil
+}
 func (r UserRepositoryDb) VerifyEmail(user User) error {
 	if err:= r.db.Model(&User{}).Where("id = ?", user.ID).Update("email_verified", true).Error; err != nil {
 		return err
 	}
 	return nil
 }
-func (r UserRepositoryDb) ReadUser(id string) (User,error) {
-	var user User
-	if err:= r.db.First(&user, id).Error; err != nil {
-		return user,err
-	}
-	return user,nil
-}
+
 func NewUserRepositoryDb(db *gorm.DB) UserRepositoryDb {
 	return UserRepositoryDb{db}
 }
