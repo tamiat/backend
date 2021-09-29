@@ -78,7 +78,7 @@ CREATE TABLE public.users (
     email text NOT NULL,
     password text NOT NULL,
     otp text,
-    email_verified boolean
+    email_verified boolean DEFAULT false
 );
 
 
