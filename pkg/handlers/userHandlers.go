@@ -139,7 +139,12 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
 		return
 	}
-
+	err=receiver.service.UpdateEmailStatus(userObj)
+	if err!=nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errs.ErrDb)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
 func valid(email string) bool {
