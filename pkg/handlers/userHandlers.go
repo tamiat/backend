@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/tamiat/backend/pkg/emailVerification"
 	"net/http"
 	"net/mail"
@@ -55,7 +56,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
-
+	fmt.Println(code)
 	w.WriteHeader(http.StatusOK)
 	userObj.Password = ""
 	json.NewEncoder(w).Encode(userObj)
