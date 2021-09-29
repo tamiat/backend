@@ -25,6 +25,13 @@ func (r UserRepositoryDb) Signup(user User) (int,error){
 	return user.ID,nil
 }
 
+func (r UserRepositoryDb) InsertOTP(user User) error {
+	if err:= r.db.Model(&User{}).Where("id = ?", user.ID).Update("otp", user.Otp).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewUserRepositoryDb(db *gorm.DB) UserRepositoryDb {
 	return UserRepositoryDb{db}
 }

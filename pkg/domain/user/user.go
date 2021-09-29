@@ -11,5 +11,5 @@ type User struct {
 type UserRepository interface {
 	Login(User)(string,error)
 	Signup(User)(int,error)
-	InsertOTP(string)error
+	InsertOTP(User)error
 }
