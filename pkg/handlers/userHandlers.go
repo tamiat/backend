@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/tamiat/backend/pkg/emailVerification"
 	"net/http"
 	"net/mail"
@@ -56,9 +55,24 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
-	fmt.Println(code)
+	//fmt.Println(code)
+
+	hashOTP, err := bcrypt.GenerateFromPassword([]byte(code), 10)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
+		return
+	}
+	userObj.Otp = string(hashOTP)
+	err=receiver.service.InsertOTP(userObj)
+	if err!=nil{
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	userObj.Password = ""
+	userObj.Otp=""
 	json.NewEncoder(w).Encode(userObj)
 
 }
