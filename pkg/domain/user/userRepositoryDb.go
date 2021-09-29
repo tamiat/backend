@@ -31,7 +31,7 @@ func (r UserRepositoryDb) InsertOTP(user User) error {
 	}
 	return nil
 }
-func (r UserRepositoryDb) ReadOPT(user User) (string,error) {
+func (r UserRepositoryDb) ReadOTP(user User) (string,error) {
 	if err:= r.db.First(&user, user.ID).Error; err != nil {
 		return "",err
 	}

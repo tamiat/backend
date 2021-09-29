@@ -132,13 +132,14 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 	var userObj user.User
 	intId, err := strconv.Atoi(id)
 	userObj.ID = intId
-	hashedOPT,err:=receiver.service.ReadOPT(userObj)
+	hashedOPT,err:=receiver.service.ReadOTP(userObj)
 	err = bcrypt.CompareHashAndPassword([]byte(hashedOPT), []byte(opt))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
 func valid(email string) bool {
