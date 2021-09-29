@@ -14,5 +14,4 @@ type UserRepository interface {
 	InsertOTP(User)error
 	VerifyEmail(User) error
 	ReadOTP(User)(string,error)
-	UpdateEmailStatus(User)error
 }
