@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4 (Ubuntu 13.4-0ubuntu0.21.04.1)
--- Dumped by pg_dump version 13.4 (Ubuntu 13.4-0ubuntu0.21.04.1)
+-- Dumped from database version 13.4 (Ubuntu 13.4-1.pgdg20.04+1)
+-- Dumped by pg_dump version 13.4 (Ubuntu 13.4-1.pgdg20.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: contenttype; Type: TABLE; Schema: public; Owner: postgres
+-- Name: contenttype; Type: TABLE; Schema: public; Owner: rahma
 --
 
 CREATE TABLE public.contenttype (
@@ -32,10 +32,10 @@ CREATE TABLE public.contenttype (
 );
 
 
-ALTER TABLE public.contenttype OWNER TO postgres;
+ALTER TABLE public.contenttype OWNER TO rahma;
 
 --
--- Name: contenttype_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: contenttype_id_seq; Type: SEQUENCE; Schema: public; Owner: rahma
 --
 
 CREATE SEQUENCE public.contenttype_id_seq
@@ -47,17 +47,17 @@ CREATE SEQUENCE public.contenttype_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.contenttype_id_seq OWNER TO postgres;
+ALTER TABLE public.contenttype_id_seq OWNER TO rahma;
 
 --
--- Name: contenttype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: contenttype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rahma
 --
 
 ALTER SEQUENCE public.contenttype_id_seq OWNED BY public.contenttype.id;
 
 
 --
--- Name: schema_migration; Type: TABLE; Schema: public; Owner: postgres
+-- Name: schema_migration; Type: TABLE; Schema: public; Owner: rahma
 --
 
 CREATE TABLE public.schema_migration (
@@ -65,10 +65,10 @@ CREATE TABLE public.schema_migration (
 );
 
 
-ALTER TABLE public.schema_migration OWNER TO postgres;
+ALTER TABLE public.schema_migration OWNER TO rahma;
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: users; Type: TABLE; Schema: public; Owner: rahma
 --
 
 CREATE TABLE public.users (
@@ -76,14 +76,16 @@ CREATE TABLE public.users (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     email text NOT NULL,
-    password text NOT NULL
+    password text NOT NULL,
+    otp text,
+    email_verified boolean
 );
 
 
-ALTER TABLE public.users OWNER TO postgres;
+ALTER TABLE public.users OWNER TO rahma;
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: rahma
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -95,31 +97,31 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO postgres;
+ALTER TABLE public.users_id_seq OWNER TO rahma;
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rahma
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: contenttype id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: contenttype id; Type: DEFAULT; Schema: public; Owner: rahma
 --
 
 ALTER TABLE ONLY public.contenttype ALTER COLUMN id SET DEFAULT nextval('public.contenttype_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: rahma
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: contenttype contenttype_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: contenttype contenttype_pkey; Type: CONSTRAINT; Schema: public; Owner: rahma
 --
 
 ALTER TABLE ONLY public.contenttype
@@ -127,7 +129,7 @@ ALTER TABLE ONLY public.contenttype
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: rahma
 --
 
 ALTER TABLE ONLY public.users
@@ -135,7 +137,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: rahma
 --
 
 ALTER TABLE ONLY public.users
@@ -143,7 +145,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: schema_migration_version_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: schema_migration_version_idx; Type: INDEX; Schema: public; Owner: rahma
 --
 
 CREATE UNIQUE INDEX schema_migration_version_idx ON public.schema_migration USING btree (version);

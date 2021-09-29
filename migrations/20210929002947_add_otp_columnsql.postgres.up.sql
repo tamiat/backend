@@ -1,2 +1,2 @@
 ALTER TABLE users
-    ADD COLUMN otp text;
+ADD COLUMN otp text;
