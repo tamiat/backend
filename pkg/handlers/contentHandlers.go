@@ -49,6 +49,7 @@ func (ch *ContentHandlers) readContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := vars["id"]
+
 	log.Println(id)
 	content, err := ch.service.ReadContent(id)
 	if err != nil {

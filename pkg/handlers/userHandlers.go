@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/emailVerification"
 	"net/http"
 	"net/mail"
+	"regexp"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -109,6 +111,31 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 	jwtObj:=JWT{Token: token}
 	json.NewEncoder(w).Encode(jwtObj)
+}
+func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request){
+	var opt string
+	json.NewDecoder(r.Body).Decode(&opt)
+	if len(opt)!=6{
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusBadRequest))
+		return
+	}
+	vars := mux.Vars(r)
+	pattern1, _ := regexp.Match(`^[0-9]+$`, []byte(vars["id"]))
+	if !pattern1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errs.ErrContentParams)
+		return
+	}
+	id := vars["id"]
+	userObj,err:=receiver.service.
+	password := userObj.Password
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidPassword.Error(),http.StatusUnauthorized))
+		return
+	}
 }
 func valid(email string) bool {
 	_, err := mail.ParseAddress(email)
