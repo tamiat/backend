@@ -12,4 +12,5 @@ type UserRepository interface {
 	Login(User)(string,error)
 	Signup(User)(int,error)
 	InsertOTP(User)error
+	VerifyEmail(User) error
 }

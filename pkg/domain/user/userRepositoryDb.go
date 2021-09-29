@@ -31,7 +31,18 @@ func (r UserRepositoryDb) InsertOTP(user User) error {
 	}
 	return nil
 }
-
+func (r UserRepositoryDb) GetOPT(user User) error {
+	if err:= r.db.Model(&User{}).Where("id = ?", user.ID).Update("otp", user.Otp).Error; err != nil {
+		return err
+	}
+	return nil
+}
+func (r UserRepositoryDb) VerifyEmail(user User) error {
+	if err:= r.db.Model(&User{}).Where("id = ?", user.ID).Update("email_verified", true).Error; err != nil {
+		return err
+	}
+	return nil
+}
 func NewUserRepositoryDb(db *gorm.DB) UserRepositoryDb {
 	return UserRepositoryDb{db}
 }

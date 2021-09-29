@@ -8,7 +8,7 @@ type UserService interface {
 	Login(user.User)(string,error)
 	Signup(user.User)(int,error)
 	InsertOTP(user.User)error
-
+	VerifyEmail(user.User)error
 }
 
 type DefaultUserService struct {
@@ -24,6 +24,9 @@ func (s DefaultUserService )Signup(user user.User) (int,error) {
 }
 func (s DefaultUserService )InsertOTP(user user.User) error {
 	return s.repo.InsertOTP(user)
+}
+func (s DefaultUserService )VerifyEmail(user user.User) error {
+	return s.repo.VerifyEmail(user)
 }
 func NewUserService(repository user.UserRepository) DefaultUserService {
 	return DefaultUserService{repo: repository}

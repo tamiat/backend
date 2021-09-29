@@ -18,6 +18,7 @@ var(
 	ErrColumnName = errors.New("no specific column name was sent")
 	ErrColNotFound = errors.New("column not found")
 	ErrNoContentTypeName = errors.New("there is no content type name")
+	ErrInvalidVerificationCode = errors.New("invalid verification code")
 )
 
 type Response struct {
