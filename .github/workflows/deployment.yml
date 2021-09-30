@@ -1,0 +1,39 @@
+name: deployment
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: |
+        go build -v ./...
+        ls -la
+        go build -o ${{secrets.BINARY_FILE_NAME}} cmd/main.go
+        ls -la
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.DEV_SSH_PRIVATE_KEY }} 
+        known_hosts: ${{secrets.KNOWN_HOSTS}}
+    - name: Copy binary file to server and run service
+      run: |
+        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} stop cms.service
+        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} status cms.service
+        scp ${{secrets.BINARY_FILE_NAME}} ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}}:${{secrets.DISTINATION_PATH}}
+    - name: start service 
+      if: always()
+      run: |
+        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} start cms.service
+        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} status cms.service
