@@ -59,9 +59,16 @@ func Start() {
 
 	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
 	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
-	router.Path("/api/v1/confirmEmail").Queries("id", "{id}").HandlerFunc(usertHandler.VerifyEmail).Methods(http.MethodPost)
-
-	log.Fatal(http.ListenAndServe("localhost:8000", handlers.CORS(headers, methods, origins)(router)))
+	//router.HandleFunc("/api/v1/confirmEmail/", homePage).Methods("POST")
+	//router.Path("/api/v1/confirmEmail/").Queries("id", "{id}").HandlerFunc(homePage).Methods(http.MethodGet)
+	//router.HandleFunc("/api/v1/confirmEmail/", homePage).Methods(http.MethodGet)
+	router.Path("/api/v1/confirmEmail/{id}").
+		HandlerFunc(usertHandler.VerifyEmail).Methods(http.MethodPost)
+	log.Fatal(http.ListenAndServe("localhost:8080", handlers.CORS(headers, methods, origins)(router)))
+}
+func homePage(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "Welcome to the HomePage!")
+	fmt.Println("Endpoint Hit: homePage")
 }
 func getDbConnetion() (*gorm.DB, *sql.DB) {
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",

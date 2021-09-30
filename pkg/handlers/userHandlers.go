@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/emailVerification"
 	"net/http"
@@ -114,9 +115,10 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	json.NewEncoder(w).Encode(jwtObj)
 }
 func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request){
-	var opt string
-	json.NewDecoder(r.Body).Decode(&opt)
-	if len(opt)!=6{
+	var userObj user.User
+	json.NewDecoder(r.Body).Decode(&userObj)
+	otp:=userObj.Otp
+	if len(otp)!=6{
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusBadRequest))
 		return
@@ -129,11 +131,12 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	id := vars["id"]
-	var userObj user.User
+	//var userObj user.User
 	intId, err := strconv.Atoi(id)
+	fmt.Println(intId)
 	userObj.ID = intId
-	hashedOPT,err:=receiver.service.ReadOTP(userObj)
-	err = bcrypt.CompareHashAndPassword([]byte(hashedOPT), []byte(opt))
+	hashedOTP,err:=receiver.service.ReadOTP(userObj)
+	err = bcrypt.CompareHashAndPassword([]byte(hashedOTP), []byte(otp))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
