@@ -1,6 +1,9 @@
 package user
 
 import (
+  "fmt"
+
+	"github.com/harranali/authority"
 	"gorm.io/gorm"
 
 	"github.com/tamiat/backend/pkg/errs"
@@ -44,6 +47,6 @@ func (r UserRepositoryDb) VerifyEmail(user User) error {
 	return nil
 }
 
-func NewUserRepositoryDb(db *gorm.DB) UserRepositoryDb {
-	return UserRepositoryDb{db}
+func NewUserRepositoryDb(db *gorm.DB, auth *authority.Authority) UserRepositoryDb {
+	return UserRepositoryDb{db, auth}
 }
