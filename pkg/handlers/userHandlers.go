@@ -151,10 +151,13 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 	}
 	w.WriteHeader(http.StatusOK)
 }
+// valid used to check email validation
 func valid(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
 }
+
+// validateEmailAndPassword validates email and pass
 func validateEmailAndPassword(userObj user.User)error{
 	//err error()
 	if userObj.Email == "" {

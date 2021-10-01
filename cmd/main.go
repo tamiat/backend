@@ -7,10 +7,11 @@ import (
 )
 
 func main(){
+	//load env variables
 	err := godotenv.Load(".env")
-	//var startDate = "2021-09-01"
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+	//start app
 	handlers.Start()
 }

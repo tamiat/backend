@@ -1,7 +1,7 @@
 package errs
 
 import "errors"
-
+// here all errors are defined
 var(
 	ErrDb = errors.New("unexpected database error")
 	ErrContentTypeNotFound = errors.New("content type not found")

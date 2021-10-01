@@ -3,6 +3,7 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tamiat/backend/pkg/response"
 	"net/http"
 	"os"
 	"strings"
@@ -31,7 +32,7 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 			if err != nil {
 				//TODO
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+				json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 				return
 			}
 			if token.Valid {
@@ -39,13 +40,13 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 			} else {
 				//TODO
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+				json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 				return
 			}
 		} else {
 			//TODO
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidToken.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidToken.Error(),http.StatusUnauthorized))
 			return
 		}
 	})

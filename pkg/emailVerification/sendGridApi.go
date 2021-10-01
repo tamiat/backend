@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// SendEmail takes email that receives verification code,
+//connects to sendgrid api and use a template to send code
 func SendEmail(to string) (string,error){
 	//TODO remove email to be env variable
 	//TODO rename variables

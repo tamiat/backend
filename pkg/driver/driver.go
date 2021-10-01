@@ -9,7 +9,8 @@ import (
 	"os"
 )
 
-func GetDbConnetion() (*gorm.DB, *sql.DB) {
+// GetDbConnection is used to connect to postgres database
+func GetDbConnection() (*gorm.DB, *sql.DB) {
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s",
 		os.Getenv("HOST"),
 		os.Getenv("DBPORT"),
@@ -23,13 +24,6 @@ func GetDbConnetion() (*gorm.DB, *sql.DB) {
 		panic(err)
 	}
 	log.Println("connected to db ")
-
-	//test connection
-	/*err = db.Ping()
-	if err != nil {
-		log.Fatal("cannot ping db")
-		panic(err)
-	}*/
 	log.Println("pinged db")
 	return db, sqlDB
 }
