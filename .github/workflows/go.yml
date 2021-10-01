@@ -20,7 +20,7 @@ jobs:
       run: |
         go build -v ./...
         ls -la
-        go build -o ${{secrets.BINARY_FILE_NAME}} cmd/main.go
+        go build -o cms_api cmd/main.go
         ls -la
     - name: Install SSH Key
       uses: shimataro/ssh-key-action@v2
