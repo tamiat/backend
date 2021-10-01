@@ -13,7 +13,6 @@ func SendEmail(to string) (string,error){
 	//TODO rename variables
 	//TODO add comments
 	from := "ryasser@egirna.net"
-	to = "rahma.y9079@gmail.com"
 	code:=CodeGenerator()
 	//TODO template id could be deleted
 	jsonText:=fmt.Sprintf("{\n  \"from\":{\"email\":\"%s\"},\n  \"personalizations\":[\n    {\n      \"to\":[\n        {\n          \"email\":\"%s\"\n        }\n      ],\n      \"dynamic_template_data\":{\n        \"code\": \"%s\"\n      }\n    }\n  ],\n  \"template_id\":\"d-de1aefebe42f43939bac714a95b8779e\"\n}\n",from,to,code)
