@@ -17,10 +17,9 @@ func SendEmail(to string) (string,error){
 	//TODO template id could be deleted
 	jsonText:=fmt.Sprintf("{\n  \"from\":{\"email\":\"%s\"},\n  \"personalizations\":[\n    {\n      \"to\":[\n        {\n          \"email\":\"%s\"\n        }\n      ],\n      \"dynamic_template_data\":{\n        \"code\": \"%s\"\n      }\n    }\n  ],\n  \"template_id\":\"d-de1aefebe42f43939bac714a95b8779e\"\n}\n",from,to,code)
 	var jsonReq2 = []byte(jsonText)
-	u:="https://api.sendgrid.com/v3/mail/send"
-	req, err := http.NewRequest("POST", u, bytes.NewBuffer(jsonReq2))
+	url :="https://api.sendgrid.com/v3/mail/send"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq2))
 	req.Header.Set("Content-Type", "application/json")
-	//TODO add SENDGRID_API_KEY env var
 	bearer:="Bearer " + os.Getenv("SENDGRID_API_KEY")
 	req.Header.Add("Authorization", bearer)
 
@@ -28,8 +27,8 @@ func SendEmail(to string) (string,error){
 		fmt.Println("error while making request to sendgrid api")
 		return "",err
 	}
-	c := http.DefaultClient
-	resp, err := c.Do(req)
+	client := http.DefaultClient
+	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("error while making request to sendgrid api")
 		return "",err

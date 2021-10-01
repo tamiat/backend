@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/tamiat/backend/pkg/emailVerification"
+	"github.com/tamiat/backend/pkg/response"
 	"net/http"
 	"net/mail"
 	"regexp"
@@ -34,7 +35,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	err:=validateEmailAndPassword(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusBadRequest))
 		return
 	}
 	//encrypting password
@@ -42,7 +43,7 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		//TODO check if this is right
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	userObj.Password = string(hash)
@@ -50,13 +51,13 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	userObj.ID,err = receiver.service.Signup(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	code,err:=emailVerification.SendEmail(userObj.Email)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	//fmt.Println(code)
@@ -64,14 +65,14 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 	hashOTP, err := bcrypt.GenerateFromPassword([]byte(code), 10)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
 		return
 	}
 	userObj.Otp = string(hashOTP)
 	err=receiver.service.InsertOTP(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -87,13 +88,13 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	err:=validateEmailAndPassword(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusBadRequest))
 		return
 	}
 	hashedPassword,err:=receiver.service.Login(userObj)
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrDb.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(),http.StatusInternalServerError))
 		return
 	}
 	//usr password before hashing
@@ -101,13 +102,13 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidPassword.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidPassword.Error(),http.StatusUnauthorized))
 		return
 	}
 	token, err := middleware.GenerateToken(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrTokenErr.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrTokenErr.Error(),http.StatusUnauthorized))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -120,7 +121,7 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 	otp:=userObj.Otp
 	if len(otp)!=6{
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusBadRequest))
 		return
 	}
 	vars := mux.Vars(r)
@@ -139,7 +140,7 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 	err = bcrypt.CompareHashAndPassword([]byte(hashedOTP), []byte(otp))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
 		return
 	}
 	err=receiver.service.VerifyEmail(userObj)
