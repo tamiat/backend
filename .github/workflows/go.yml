@@ -31,7 +31,7 @@ jobs:
       run: systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} stop cms.service
     - name: Copy binary file to server and run service
       run: |
-        scp cms_api ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:/var/www
+        scp ${{secrets.BINARY_FILE_NAME}} ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{secrets.DISTINATION_PATH}}
     - name: start service 
       if: always()
       run: |
