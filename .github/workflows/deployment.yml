@@ -25,15 +25,15 @@ jobs:
     - name: Install SSH Key
       uses: shimataro/ssh-key-action@v2
       with:
-        key: ${{ secrets.DEV_SSH_PRIVATE_KEY }} 
+        key: ${{ secrets.SSH_PRIVATE_KEY }} 
         known_hosts: ${{secrets.KNOWN_HOSTS}}
+    - name: stop service
+      run: systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} stop cms.service
     - name: Copy binary file to server and run service
       run: |
-        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} stop cms.service
-        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} status cms.service
-        scp ${{secrets.BINARY_FILE_NAME}} ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}}:${{secrets.DISTINATION_PATH}}
+        scp ${{secrets.BINARY_FILE_NAME}} ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{secrets.DISTINATION_PATH}}
     - name: start service 
       if: always()
       run: |
-        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} start cms.service
-        systemctl --host ${{secrets.DEV_SSH_USER}}@${{secrets.DEV_EGIRNA_NET}} status cms.service
+        systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} start cms.service
+        systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} status cms.service
