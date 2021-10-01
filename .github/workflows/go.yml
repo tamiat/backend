@@ -27,11 +27,11 @@ jobs:
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }} 
         known_hosts: ${{secrets.KNOWN_HOSTS}}
+    - name: stop service
+      run: systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} stop cms.service
     - name: Copy binary file to server and run service
       run: |
-        systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} stop cms.service
-        systemctl --host ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} status cms.service
-        scp cms_api root@178.62.103.203:/var/www
+        scp cms_api ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:/var/www
     - name: start service 
       if: always()
       run: |
