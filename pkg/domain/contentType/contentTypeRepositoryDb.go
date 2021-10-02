@@ -68,7 +68,6 @@ func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error 
 	if !role {
 		return errs.ErrUnauthorized
 	}
-<<<<<<< HEAD
 	if err != nil {
 		return err
 	}
@@ -76,15 +75,6 @@ func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error 
 	if err != nil {
 		return err
 	}
-=======
-	if err != nil {
-		return err
-	}
-	name, err := r.isTableExists(contentTypeId)
-	if err != nil {
-		return err
-	}
->>>>>>> ff64c0ae41d76f7c9491088c13feda7152987af6
 	_, err = r.sqlDB.Exec(`DELETE FROM contentType WHERE id= $1`, contentTypeId)
 	if err != nil {
 		return err
@@ -168,8 +158,4 @@ func NewContentTypeRepositoryDb(gormDb *gorm.DB, sqlDB *sql.DB, auth *authority.
 		TablesPrefix: "authority_",
 		DB:           gormDb,
 	})}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> ff64c0ae41d76f7c9491088c13feda7152987af6
