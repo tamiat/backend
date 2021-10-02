@@ -28,4 +28,5 @@ func (s DefaultRoleService) Delete(roleId int) error {
 
 func NewRoleService(repository role.RoleRepository) DefaultRoleService {
 	return DefaultRoleService{repo: repository}
+
 }

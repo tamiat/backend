@@ -24,7 +24,3 @@ var(
 	ErrUnauthorized = errors.New("you are unauthorized")
 	ErrInvalidVerificationCode = errors.New("invalid verification code")
 )
-
-
-
-
