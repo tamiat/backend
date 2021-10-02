@@ -11,13 +11,11 @@ import (
 // SendEmail takes email that receives verification code,
 //connects to sendgrid api and use a template to send code
 func SendEmail(to string) (string,error){
-	//TODO remove email to be env variable
-	//TODO rename variables
-	//TODO add comments
-	from := "ryasser@egirna.net"
+	from := os.Getenv("EMAIL_SENDER")
 	code:=CodeGenerator()
-	//TODO template id could be deleted
-	jsonText:=fmt.Sprintf("{\n  \"from\":{\"email\":\"%s\"},\n  \"personalizations\":[\n    {\n      \"to\":[\n        {\n          \"email\":\"%s\"\n        }\n      ],\n      \"dynamic_template_data\":{\n        \"code\": \"%s\"\n      }\n    }\n  ],\n  \"template_id\":\"d-de1aefebe42f43939bac714a95b8779e\"\n}\n",from,to,code)
+
+	template_id := os.Getenv("TEMPLATE_ID")
+	jsonText:=fmt.Sprintf("{\n  \"from\":{\"email\":\"%s\"},\n  \"personalizations\":[\n    {\n      \"to\":[\n        {\n          \"email\":\"%s\"\n        }\n      ],\n      \"dynamic_template_data\":{\n        \"code\": \"%s\"\n      }\n    }\n  ],\n  \"template_id\":\"%s\"\n}\n",from,to,code,template_id)
 	var jsonReq2 = []byte(jsonText)
 	url :="https://api.sendgrid.com/v3/mail/send"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq2))

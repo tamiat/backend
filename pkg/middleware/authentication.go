@@ -18,7 +18,7 @@ import (
 
 func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		secret:=fmt.Sprintf("%s",os.Getenv("SECRET"))
+		secret:=fmt.Sprintf("%s",os.Getenv("JWT_SECRET"))
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) == 2 {
@@ -53,7 +53,7 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 }
 func GenerateToken(user user.User) (string, error) {
 	var err error
-	secret:=fmt.Sprintf("%s",os.Getenv("SECRET"))
+	secret:=fmt.Sprintf("%s",os.Getenv("JWT_SECRET"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		//TODO change claims
 		"email": user.Email,
