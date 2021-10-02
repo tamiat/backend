@@ -16,8 +16,8 @@ func GetDbConnection() (*gorm.DB, *sql.DB) {
 		os.Getenv("HOST"),
 		os.Getenv("DBPORT"),
 		os.Getenv("DBNAME"),
-		os.Getenv("USER"),
-		os.Getenv("PASS"))
+		os.Getenv("DBUSER"),
+		os.Getenv("DBPASS"))
 	sqlDB, err := sql.Open("pgx", dataSourceName)
 	db, err := gorm.Open(postgres.Open(dataSourceName), &gorm.Config{})
 	if err != nil {

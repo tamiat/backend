@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: contenttype; Type: TABLE; Schema: public; Owner: rahma
+-- Name: contenttype; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.contenttype (
@@ -32,10 +32,10 @@ CREATE TABLE public.contenttype (
 );
 
 
-ALTER TABLE public.contenttype OWNER TO rahma;
+ALTER TABLE public.contenttype OWNER TO postgres;
 
 --
--- Name: contenttype_id_seq; Type: SEQUENCE; Schema: public; Owner: rahma
+-- Name: contenttype_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.contenttype_id_seq
@@ -47,17 +47,17 @@ CREATE SEQUENCE public.contenttype_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.contenttype_id_seq OWNER TO rahma;
+ALTER TABLE public.contenttype_id_seq OWNER TO postgres;
 
 --
--- Name: contenttype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rahma
+-- Name: contenttype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.contenttype_id_seq OWNED BY public.contenttype.id;
 
 
 --
--- Name: schema_migration; Type: TABLE; Schema: public; Owner: rahma
+-- Name: schema_migration; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.schema_migration (
@@ -65,10 +65,10 @@ CREATE TABLE public.schema_migration (
 );
 
 
-ALTER TABLE public.schema_migration OWNER TO rahma;
+ALTER TABLE public.schema_migration OWNER TO postgres;
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: rahma
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -82,10 +82,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO rahma;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: rahma
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -97,31 +97,31 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO rahma;
+ALTER TABLE public.users_id_seq OWNER TO postgres;
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rahma
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: contenttype id; Type: DEFAULT; Schema: public; Owner: rahma
+-- Name: contenttype id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.contenttype ALTER COLUMN id SET DEFAULT nextval('public.contenttype_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: rahma
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: contenttype contenttype_pkey; Type: CONSTRAINT; Schema: public; Owner: rahma
+-- Name: contenttype contenttype_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.contenttype
@@ -129,7 +129,7 @@ ALTER TABLE ONLY public.contenttype
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: rahma
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -137,7 +137,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: rahma
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -145,7 +145,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: schema_migration_version_idx; Type: INDEX; Schema: public; Owner: rahma
+-- Name: schema_migration_version_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX schema_migration_version_idx ON public.schema_migration USING btree (version);

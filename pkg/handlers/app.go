@@ -29,22 +29,24 @@ func Start() {
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection, auth))}
 	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection ,auth))}
 
-		router.Path("/api/v1/contentType").
-			HandlerFunc(middleware.TokenVerifyMiddleWare( ct.createContentType)).Methods(http.MethodPost)
 
-		router.Path("/api/v1/contentType").Queries("id", "{id}").
-			HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteContentType)).Methods(http.MethodDelete)
+	router.Path("/api/v1/contentType/{userId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.createContentType)).Methods(http.MethodPost)
 
-		router.Path("/api/v1/contentType/renamecol").Queries("id", "{id}").
-			HandlerFunc(middleware.TokenVerifyMiddleWare(ct.updateColName)).Methods(http.MethodPut)
+	router.Path("/api/v1/contentType/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteContentType)).Methods(http.MethodDelete)
 
-		router.Path("/api/v1/contentType/addcol").Queries("id", "{id}").
-			HandlerFunc(middleware.TokenVerifyMiddleWare(ct.addCol)).Methods(http.MethodPut)
+	router.Path("/api/v1/contentType/renamecol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.updateColName)).Methods(http.MethodPut)
 
-		router.Path("/api/v1/contentType/delcol").Queries("id", "{id}").
-			HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteCol)).Methods(http.MethodPut)
+	router.Path("/api/v1/contentType/addcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.addCol)).Methods(http.MethodPut)
 
-	router.HandleFunc("/api/v1/roles", middleware.TokenVerifyMiddleWare(roleHandler.Create)).Methods(http.MethodPost)
+	router.Path("/api/v1/contentType/delcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteCol)).Methods(http.MethodPut)
+
+
+	router.HandleFunc("/api/v1/roles", roleHandler.Create).Methods(http.MethodPost)
 	router.HandleFunc("/api/v1/roles", middleware.TokenVerifyMiddleWare(roleHandler.Read)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/roles/{id:[0-9]+}", middleware.TokenVerifyMiddleWare(roleHandler.Delete)).Methods(http.MethodDelete)
 
