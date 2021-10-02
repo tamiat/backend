@@ -3,6 +3,7 @@ package driver
 import (
 	"database/sql"
 	"fmt"
+	"github.com/harranali/authority"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -26,4 +27,10 @@ func GetDbConnection() (*gorm.DB, *sql.DB) {
 	log.Println("connected to db ")
 	log.Println("pinged db")
 	return db, sqlDB
+}
+func InitAuthority(db *gorm.DB) *authority.Authority{
+	return authority.New(authority.Options{
+		TablesPrefix: "authority_",
+		DB:           db,
+	})
 }

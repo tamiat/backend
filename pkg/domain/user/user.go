@@ -6,6 +6,7 @@ type User struct {
 	Password string `json:"password"`
 	Otp string `json:"otp"`
 	EmailVerified bool `json:"email_verified"`
+	Role     string `json:"role"`
 }
 
 type UserRepository interface {

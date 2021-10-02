@@ -2,7 +2,9 @@ package contentType
 
 import (
 	"database/sql"
+	"strconv"
 
+	"github.com/harranali/authority"
 	"gorm.io/gorm"
 
 	"github.com/tamiat/backend/pkg/errs"
@@ -11,6 +13,7 @@ import (
 type ContentTypeRepositoryDb struct {
 	db    *gorm.DB
 	sqlDB *sql.DB
+	auth  *authority.Authority
 }
 
 func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
@@ -25,7 +28,7 @@ func (r ContentTypeRepositoryDb) isTableExists(id string) (string, error) {
 
 func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) error {
 	var numOfCols int
-	row :=r.sqlDB.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_name=$1 and column_name=$2", tableName, colName)
+	row := r.sqlDB.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_name=$1 and column_name=$2", tableName, colName)
 	err := row.Scan(&numOfCols)
 	if err != nil {
 		return errs.ErrDb
@@ -36,8 +39,14 @@ func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) e
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
-	_, err := r.sqlDB.Exec("INSERT INTO contentType (name) VALUES ($1)", n)
+func (r ContentTypeRepositoryDb) Create(userId, n, cols string) (string, error) {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	if !role1 && !role2 {
+		return "", errs.ErrUnauthorized
+	}
+	_, err = r.sqlDB.Exec("INSERT INTO contentType (name) VALUES ($1)", n)
 	if err != nil {
 		return "", errs.ErrDb
 	}
@@ -53,12 +62,20 @@ func (r ContentTypeRepositoryDb) Create(n string, cols string) (string, error) {
 	return id, nil
 }
 
-func (r ContentTypeRepositoryDb) DeleteById(id string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	if !role {
+		return errs.ErrUnauthorized
+	}
 	if err != nil {
 		return err
 	}
-	_, err = r.sqlDB.Exec(`DELETE FROM contentType WHERE id= $1` , id)
+	name, err := r.isTableExists(contentTypeId)
+	if err != nil {
+		return err
+	}
+	_, err = r.sqlDB.Exec(`DELETE FROM contentType WHERE id= $1`, contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -69,8 +86,15 @@ func (r ContentTypeRepositoryDb) DeleteById(id string) error {
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newName string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) UpdateColName(userId, contentTypeId, oldName, newName string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	role3, err := r.auth.CheckRole(uint(intUserId), "others")
+	if !role1 && !role2 && !role3 {
+		return errs.ErrUnauthorized
+	}
+	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -86,8 +110,15 @@ func (r ContentTypeRepositoryDb) UpdateColName(id string, oldName string, newNam
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) AddCol(userId, contentTypeId, col string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	role3, err := r.auth.CheckRole(uint(intUserId), "others")
+	if !role1 && !role2 && !role3 {
+		return errs.ErrUnauthorized
+	}
+	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -99,8 +130,15 @@ func (r ContentTypeRepositoryDb) AddCol(id string, col string) error {
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
-	name, err := r.isTableExists(id)
+func (r ContentTypeRepositoryDb) DeleteCol(userId, contentTypeId, col string) error {
+	intUserId, err := strconv.Atoi(userId)
+	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
+	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
+	role3, err := r.auth.CheckRole(uint(intUserId), "others")
+	if !role1 && !role2 && !role3 {
+		return errs.ErrUnauthorized
+	}
+	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
 		return err
 	}
@@ -115,6 +153,9 @@ func (r ContentTypeRepositoryDb) DeleteCol(id string, col string) error {
 	return nil
 }
 
-func NewContentTypeRepositoryDb(gormDb *gorm.DB, sqlDB *sql.DB) ContentTypeRepositoryDb {
-	return ContentTypeRepositoryDb{gormDb, sqlDB}
+func NewContentTypeRepositoryDb(gormDb *gorm.DB, sqlDB *sql.DB, auth *authority.Authority) ContentTypeRepositoryDb {
+	return ContentTypeRepositoryDb{gormDb, sqlDB, authority.New(authority.Options{
+		TablesPrefix: "authority_",
+		DB:           gormDb,
+	})}
 }
