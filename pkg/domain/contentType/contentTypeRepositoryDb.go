@@ -149,11 +149,6 @@ func (r ContentTypeRepositoryDb) DeleteCol(userId, contentTypeId, col string) er
 		fmt.Println("isColExists")
 		return err
 	}
-	/*newErr := r.db.Raw("ALTER TABLE ? DROP COLUMN ?", name, col)
-	if newErr != nil {
-		fmt.Println("err while dropping col")
-		return errs.ErrDb
-	}*/
 	query := `ALTER TABLE ` + name + ` DROP COLUMN ` + col
 	_, err = r.sqlDB.Exec(query)
 	if err != nil {

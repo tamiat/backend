@@ -3,11 +3,13 @@ package driver
 import (
 	"database/sql"
 	"fmt"
-	"github.com/harranali/authority"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 	"os"
+
+	"github.com/harranali/authority"
+
 )
 
 // GetDbConnection is used to connect to postgres database

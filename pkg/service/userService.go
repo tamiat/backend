@@ -7,8 +7,11 @@ import (
 type UserService interface {
 	Login(user.User)(string,error)
 	Signup(user.User)(int,error)
+	// InsertOTP saves otp into database
 	InsertOTP(user.User)error
+	// VerifyEmail sets email_verified column to true
 	VerifyEmail(user.User)error
+	// ReadOTP gets otp from database
 	ReadOTP(user.User)(string,error)
 
 }

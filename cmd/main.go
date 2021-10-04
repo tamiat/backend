@@ -1,9 +1,12 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/tamiat/backend/pkg/handlers"
 	"log"
+
+	"github.com/joho/godotenv"
+
+	"github.com/tamiat/backend/pkg/handlers"
+
 )
 
 func main(){

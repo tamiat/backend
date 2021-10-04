@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/tamiat/backend/pkg/response"
 	"net/http"
 	"strconv"
 
@@ -11,6 +10,7 @@ import (
 
 	"github.com/tamiat/backend/pkg/domain/role"
 	"github.com/tamiat/backend/pkg/errs"
+	"github.com/tamiat/backend/pkg/response"
 	"github.com/tamiat/backend/pkg/service"
 )
 

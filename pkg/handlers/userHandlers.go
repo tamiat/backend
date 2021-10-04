@@ -3,19 +3,19 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/tamiat/backend/pkg/emailVerification"
-	"github.com/tamiat/backend/pkg/response"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/mail"
 	"regexp"
 	"strconv"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/gorilla/mux"
 
 	"github.com/tamiat/backend/pkg/domain/user"
+	"github.com/tamiat/backend/pkg/emailVerification"
 	"github.com/tamiat/backend/pkg/errs"
 	"github.com/tamiat/backend/pkg/middleware"
+	"github.com/tamiat/backend/pkg/response"
 	"github.com/tamiat/backend/pkg/service"
 )
 
@@ -61,7 +61,6 @@ func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
 		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
-	//fmt.Println(code)
 
 	hashOTP, err := bcrypt.GenerateFromPassword([]byte(code), 10)
 	if err != nil {
