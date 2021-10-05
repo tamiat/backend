@@ -12,12 +12,13 @@ import (
 
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/errs"
+	"github.com/tamiat/backend/pkg/response"
 )
 
 
 func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		secret:=fmt.Sprintf("%s",os.Getenv("SECRET"))
+		secret:=fmt.Sprintf("%s",os.Getenv("JWT_SECRET"))
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) == 2 {
@@ -31,7 +32,7 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 			if err != nil {
 				//TODO
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+				json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 				return
 			}
 			if token.Valid {
@@ -39,20 +40,20 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 			} else {
 				//TODO
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+				json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 				return
 			}
 		} else {
 			//TODO
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrInvalidToken.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidToken.Error(),http.StatusUnauthorized))
 			return
 		}
 	})
 }
 func GenerateToken(user user.User) (string, error) {
 	var err error
-	secret:=fmt.Sprintf("%s",os.Getenv("SECRET"))
+	secret:=fmt.Sprintf("%s",os.Getenv("JWT_SECRET"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		//TODO change claims
 		"email": user.Email,

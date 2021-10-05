@@ -10,6 +10,7 @@ import (
 
 	"github.com/tamiat/backend/pkg/domain/role"
 	"github.com/tamiat/backend/pkg/errs"
+	"github.com/tamiat/backend/pkg/response"
 	"github.com/tamiat/backend/pkg/service"
 )
 
@@ -25,7 +26,7 @@ func (roleHandler RoleHandlers) Create(w http.ResponseWriter, r *http.Request) {
 	//handling errors
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(), http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
 		return
 	}
 	newRole.ID = id
@@ -41,11 +42,11 @@ func (roleHandler RoleHandlers) Read(w http.ResponseWriter, r *http.Request) {
 	//handling errors
 	if err == sql.ErrNoRows || len(roles) == 0 {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrNoRolesFound.Error(), http.StatusOK))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoRolesFound.Error(), http.StatusOK))
 		return
 	} else if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
 		return
 	}
 	//sending the response
@@ -63,14 +64,14 @@ func (roleHandler RoleHandlers) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err.Error() == `sql: no rows in result set` {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrNoRowsFound.Error(), http.StatusBadRequest))
+			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoRowsFound.Error(), http.StatusBadRequest))
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
 		}
 		return
 	}
 	//sending the response
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(errs.NewResponse("Role has been deleted successfully", http.StatusOK))
+	json.NewEncoder(w).Encode(response.NewResponse("Role has been deleted successfully", http.StatusOK))
 }

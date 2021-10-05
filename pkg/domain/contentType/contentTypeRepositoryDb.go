@@ -2,6 +2,7 @@ package contentType
 
 import (
 	"database/sql"
+	"fmt"
 	"strconv"
 
 	"github.com/harranali/authority"
@@ -140,14 +141,17 @@ func (r ContentTypeRepositoryDb) DeleteCol(userId, contentTypeId, col string) er
 	}
 	name, err := r.isTableExists(contentTypeId)
 	if err != nil {
+		fmt.Println("isTableExists")
 		return err
 	}
 	err = r.isColExists(name, col)
 	if err != nil {
+		fmt.Println("isColExists")
 		return err
 	}
-	newErr := r.db.Raw("ALTER TABLE ? DROP COLUMN ?", name, col)
-	if newErr != nil {
+	query := `ALTER TABLE ` + name + ` DROP COLUMN ` + col
+	_, err = r.sqlDB.Exec(query)
+	if err != nil {
 		return errs.ErrDb
 	}
 	return nil

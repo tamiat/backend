@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/tamiat/backend/pkg/errs"
+	"github.com/tamiat/backend/pkg/response"
 	"github.com/tamiat/backend/pkg/service"
 )
 
@@ -40,7 +41,7 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 	}
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrNoContentTypeName.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoContentTypeName.Error(),http.StatusBadRequest))
 		return
 	}
 	col = col[0 : len(col)-1]
@@ -49,11 +50,11 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 	if err != nil {
 		if err == errs.ErrUnauthorized {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	type ID struct {
@@ -75,19 +76,19 @@ func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.
 	if err != nil {
 		if err == errs.ErrContentNotFound {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
 			return
 		} else if err == errs.ErrUnauthorized {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(errs.NewResponse("This content has been deleted successfully",http.StatusOK))
+	json.NewEncoder(w).Encode(response.NewResponse("This content has been deleted successfully",http.StatusOK))
 	return
 }
 
@@ -111,26 +112,26 @@ func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Requ
 	}
 	if i != 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
 	err = ch.service.UpdateColName(userId, contentTypeId, oldName, newName)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
 			return
 		} else if err == errs.ErrUnauthorized {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(errs.NewResponse("This column has been renamed successfully",http.StatusOK))
+	json.NewEncoder(w).Encode(response.NewResponse("This column has been renamed successfully",http.StatusOK))
 	return
 }
 
@@ -155,26 +156,26 @@ func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
 	}
 	if i != 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
 	err = ch.service.AddCol(userId, contentTypeId, col)
 	if err != nil {
 		if err == errs.ErrContentTypeNotFound {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
 			return
 		} else if err == errs.ErrUnauthorized {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(errs.NewResponse("This new column has been added successfully",http.StatusOK))
+	json.NewEncoder(w).Encode(response.NewResponse("This new column has been added successfully",http.StatusOK))
 	return
 }
 
@@ -197,25 +198,25 @@ func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request)
 	}
 	if i != 1 || m["column name"] != col {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errs.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
 		return
 	}
 	err = ch.service.DeleteCol(userId, contentTypeId, col)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusNotFound))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
 			return
 		} else if err == errs.ErrUnauthorized {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusUnauthorized))
+			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errs.NewResponse(err.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(errs.NewResponse("This column has been deleted successfully",http.StatusOK))
+	json.NewEncoder(w).Encode(response.NewResponse("This column has been deleted successfully",http.StatusOK))
 	return
 }

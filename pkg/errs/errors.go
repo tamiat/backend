@@ -1,7 +1,7 @@
 package errs
 
 import "errors"
-
+// here all errors are defined
 var(
 	ErrDb = errors.New("unexpected database error")
 	ErrContentTypeNotFound = errors.New("content type not found")
@@ -22,14 +22,5 @@ var(
 	ErrNoRolesFound = errors.New("no types found")
 	ErrNoRowsFound = errors.New("no values found")
 	ErrUnauthorized = errors.New("you are unauthorized")
+	ErrInvalidVerificationCode = errors.New("invalid verification code")
 )
-
-type Response struct {
-	Message string `json:"message"`
-	Status int `json:"status"`
-}
-func NewResponse(message string, status int) *Response {
-	return &Response{Message: message, Status: status}
-}
-
-
