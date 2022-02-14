@@ -1,34 +1,59 @@
 package handlers
 
+// app.go is used to define all routes and start server
+
 import (
-	"github.com/gorilla/mux"
-	"github.com/tamiat/backend/pkg/domain/content"
-	"github.com/tamiat/backend/pkg/service"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+
+	"github.com/tamiat/backend/pkg/domain/contentType"
+	"github.com/tamiat/backend/pkg/domain/role"
+	"github.com/tamiat/backend/pkg/domain/user"
+	"github.com/tamiat/backend/pkg/driver"
+	"github.com/tamiat/backend/pkg/middleware"
+	"github.com/tamiat/backend/pkg/service"
+
 )
 
 func Start() {
 	router := mux.NewRouter()
-	ch := ContentHandlers{service.NewContentService(content.NewContentRepositoryDb())}
-	router.HandleFunc("/api/v1/contents", ch.getAllContents).Methods(http.MethodGet)
-	//get a content by id
-	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.getContent).Methods(http.MethodGet)
+	headers := handlers.AllowedHeaders([]string{"content-type"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+	dbConnection, sqlDBConnection := driver.GetDbConnection()
+	auth := driver.InitAuthority(dbConnection)
+	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection,auth))}
+	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection, auth))}
+	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection ,auth))}
 
-	//get range of contents
-	router.Path("/api/v1/contents").Queries("id", "{id}").
-		HandlerFunc(ch.getRangeOfContents).Methods(http.MethodGet)
 
-	//post a content
-	router.HandleFunc("/api/v1/content", ch.postContent).Methods(http.MethodPost)
+	router.Path("/api/v1/contentType/{userId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.createContentType)).Methods(http.MethodPost)
 
-	//
-	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.deleteContent).Methods(http.MethodDelete)
+	router.Path("/api/v1/contentType/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteContentType)).Methods(http.MethodDelete)
 
-	router.Path("/api/v1/content").Queries("id", "{id}").
-		HandlerFunc(ch.updateContent).Methods(http.MethodPut)
+	router.Path("/api/v1/contentType/renamecol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.updateColName)).Methods(http.MethodPut)
 
-	log.Fatal(http.ListenAndServe("localhost:8080", router))
+	router.Path("/api/v1/contentType/addcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.addCol)).Methods(http.MethodPut)
+
+	router.Path("/api/v1/contentType/delcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
+		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteCol)).Methods(http.MethodPut)
+
+
+	router.HandleFunc("/api/v1/roles", roleHandler.Create).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/roles", middleware.TokenVerifyMiddleWare(roleHandler.Read)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/roles/{id:[0-9]+}", middleware.TokenVerifyMiddleWare(roleHandler.Delete)).Methods(http.MethodDelete)
+
+	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
+	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
+	router.Path("/api/v1/confirmEmail/{id}").
+		HandlerFunc(usertHandler.VerifyEmail).Methods(http.MethodPost)
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(headers, methods, origins)(router)))
 }
+
