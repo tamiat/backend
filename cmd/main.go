@@ -16,5 +16,7 @@ func main(){
 		log.Fatalf("Error loading .env file")
 	}
 	//start app
-	handlers.Start()
+	//handlers.Tmp()
+	//handlers.Start()
+	handlers.TestStart()
 }

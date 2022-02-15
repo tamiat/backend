@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/mail"
@@ -27,74 +28,79 @@ type JWT struct {
 	Token string `json:"token"`
 }
 
-func (receiver UserHandlers) Signup(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Content-Type", "application/json")
+func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
+	//w.Header().Set("Content-Type", "application/json")
 	//extracting usr obj
 	var userObj user.User
-	json.NewDecoder(r.Body).Decode(&userObj)
+	err := ctx.ShouldBind(&userObj)
+	//json.NewDecoder(r.Body).Decode(&userObj)
 	//validating email and password
-	err:=validateEmailAndPassword(userObj)
-	if err!=nil{
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusBadRequest))
-		return
+	if err != nil {
+		return userObj, http.StatusBadRequest, err
 	}
+	/*err = validateEmailAndPassword(userObj)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusBadRequest))
+		return
+	}*/
 	//encrypting password
 	hash, err := bcrypt.GenerateFromPassword([]byte(userObj.Password), 10)
 	if err != nil {
 		//TODO check if this is right
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
-		return
+		//w.WriteHeader(http.StatusInternalServerError)
+		//json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(), http.StatusInternalServerError))
+		return userObj, http.StatusInternalServerError, err
 	}
 	userObj.Password = string(hash)
 	//database connection
-	userObj.ID,err = receiver.service.Signup(userObj)
-	if err!=nil{
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
-		return
+	userObj.ID, err = receiver.service.Signup(userObj)
+	if err != nil {
+		fmt.Println("mn eel service ya rahmaaa")
+		return userObj, http.StatusInternalServerError, err
 	}
-	code,err:=emailVerification.SendEmail(userObj.Email)
-	if err!=nil{
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
-		return
+	code, err := emailVerification.SendEmail(userObj.Email)
+	if err != nil {
+		//w.WriteHeader(http.StatusInternalServerError)
+		//json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
+		return userObj, http.StatusInternalServerError, err
 	}
 
 	hashOTP, err := bcrypt.GenerateFromPassword([]byte(code), 10)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(),http.StatusInternalServerError))
-		return
+		//w.WriteHeader(http.StatusInternalServerError)
+		//json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(), http.StatusInternalServerError))
+		return userObj, http.StatusInternalServerError, err
+
 	}
 	userObj.Otp = string(hashOTP)
-	err=receiver.service.InsertOTP(userObj)
-	if err!=nil{
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	userObj.Password = ""
-	userObj.Otp=""
-	json.NewEncoder(w).Encode(userObj)
+	err = receiver.service.InsertOTP(userObj)
+	if err != nil {
+		//w.WriteHeader(http.StatusInternalServerError)
+		//json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
+		return userObj, http.StatusInternalServerError, err
 
+	}
+	//w.WriteHeader(http.StatusOK)
+	userObj.Password = ""
+	userObj.Otp = ""
+	//json.NewEncoder(w).Encode(userObj)
+	return userObj, http.StatusOK, nil
 }
-func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
+func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
 	//validating email and password
-	err:=validateEmailAndPassword(userObj)
-	if err!=nil{
+	err := validateEmailAndPassword(userObj)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusBadRequest))
 		return
 	}
-	hashedPassword,err:=receiver.service.Login(userObj)
-	if err!=nil{
+	hashedPassword, err := receiver.service.Login(userObj)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(),http.StatusInternalServerError))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
 		return
 	}
 	//usr password before hashing
@@ -102,26 +108,26 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request)  {
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidPassword.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidPassword.Error(), http.StatusUnauthorized))
 		return
 	}
 	token, err := middleware.GenerateToken(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrTokenErr.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrTokenErr.Error(), http.StatusUnauthorized))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	jwtObj:=JWT{Token: token}
+	jwtObj := JWT{Token: token}
 	json.NewEncoder(w).Encode(jwtObj)
 }
-func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request){
+func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	var userObj user.User
 	json.NewDecoder(r.Body).Decode(&userObj)
-	otp:=userObj.Otp
-	if len(otp)!=6{
+	otp := userObj.Otp
+	if len(otp) != 6 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusBadRequest))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(), http.StatusBadRequest))
 		return
 	}
 	vars := mux.Vars(r)
@@ -136,21 +142,22 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 	intId, err := strconv.Atoi(id)
 	fmt.Println(intId)
 	userObj.ID = intId
-	hashedOTP,err:=receiver.service.ReadOTP(userObj)
+	hashedOTP, err := receiver.service.ReadOTP(userObj)
 	err = bcrypt.CompareHashAndPassword([]byte(hashedOTP), []byte(otp))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(),http.StatusUnauthorized))
+		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(), http.StatusUnauthorized))
 		return
 	}
-	err=receiver.service.VerifyEmail(userObj)
-	if err!=nil {
+	err = receiver.service.VerifyEmail(userObj)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errs.ErrDb)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
+
 // valid used to check email validation
 func valid(email string) bool {
 	_, err := mail.ParseAddress(email)
@@ -158,12 +165,12 @@ func valid(email string) bool {
 }
 
 // validateEmailAndPassword validates email and pass
-func validateEmailAndPassword(userObj user.User)error{
+func validateEmailAndPassword(userObj user.User) error {
 	//err error()
 	if userObj.Email == "" {
 		return errs.ErrEmailMissing
 	}
-	if !valid(userObj.Email){
+	if !valid(userObj.Email) {
 		return errs.ErrInvalidEmail
 	}
 	if userObj.Password == "" {

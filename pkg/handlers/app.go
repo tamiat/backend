@@ -3,6 +3,7 @@ package handlers
 // app.go is used to define all routes and start server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/tamiat/backend/pkg/driver"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
-
 )
 
 func Start() {
@@ -51,9 +51,13 @@ func Start() {
 	router.HandleFunc("/api/v1/roles/{id:[0-9]+}", middleware.TokenVerifyMiddleWare(roleHandler.Delete)).Methods(http.MethodDelete)
 
 	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
-	router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
+	//router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
 	router.Path("/api/v1/confirmEmail/{id}").
 		HandlerFunc(usertHandler.VerifyEmail).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(headers, methods, origins)(router)))
+}
+
+func Tmp(){
+	fmt.Println("hi ya roro :')")
 }
 
