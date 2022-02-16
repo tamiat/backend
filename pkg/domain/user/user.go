@@ -2,10 +2,10 @@ package user
 
 type User struct {
 	ID            int    `json:"id"`
-	Email         string `json:"email" binding:"required,email"`
-	Password      string `json:"password" binding:"required"`
+	Email         string `json:"email" `
+	Password      string `json:"password" `
 	Otp           string `json:"otp"`
-	EmailVerified bool   `json:"email_verified" binding:"required"`
+	EmailVerified bool   `json:"email_verified"`
 	Role          string `json:"role"`
 }
 

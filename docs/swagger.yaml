@@ -1,0 +1,89 @@
+definitions:
+  errs.ErrResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handlers.JWT:
+    properties:
+      token:
+        type: string
+    type: object
+  handlers.Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+info:
+  contact: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Provide email and password to login, response is JWT
+      parameters:
+      - description: Login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.JWT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorizes
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Login endpoint
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Some ID
+        in: path
+        name: some_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+      summary: Add a new pet to the store
+securityDefinitions:
+  bearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

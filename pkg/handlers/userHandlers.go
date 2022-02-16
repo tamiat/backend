@@ -28,11 +28,16 @@ type JWT struct {
 	Token string `json:"token"`
 }
 
+type Login struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
 func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
 	//w.Header().Set("Content-Type", "application/json")
 	//extracting usr obj
 	var userObj user.User
-	err := ctx.ShouldBind(&userObj)
+	err := ctx.ShouldBindJSON(&userObj)
 	//json.NewDecoder(r.Body).Decode(&userObj)
 	//validating email and password
 	if err != nil {
@@ -87,39 +92,53 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
 	//json.NewEncoder(w).Encode(userObj)
 	return userObj, http.StatusOK, nil
 }
-func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request) {
+
+//
+// @Summary Login endpoint
+// @Description Provide email and password to login, response is JWT
+// @Accept application/json
+// @Produce application/json
+// @Param login body handlers.Login true "Login"
+// @Success 200 {object} handlers.JWT
+// @Failure 400  {object}  errs.ErrResponse "Bad Request
+// @Failure 401  {object}  errs.ErrResponse "Unauthorizes"
+// @Failure 500  {object}  errs.ErrResponse "Internal server error"
+// @Router /login [post]
+func (receiver UserHandlers) Login(ctx *gin.Context) {
 	var userObj user.User
-	json.NewDecoder(r.Body).Decode(&userObj)
-	//validating email and password
-	err := validateEmailAndPassword(userObj)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusBadRequest))
+	var loginRequestData Login
+	//decoding request body
+	if err := ctx.ShouldBind(&loginRequestData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	userObj.Email = loginRequestData.Email
+	userObj.Password = loginRequestData.Password
+
+	// retrieving hashed password from database
 	hashedPassword, err := receiver.Service.Login(userObj)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+		if err == errs.ErrRecordNotFound {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrRecordNotFound.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrDb.Error()})
 		return
 	}
-	//usr password before hashing
-	password := userObj.Password
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidPassword.Error(), http.StatusUnauthorized))
+	// authentication process
+	if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginRequestData.Password)); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrInvalidPassword.Error()})
 		return
 	}
+	//generating token
 	token, err := middleware.GenerateToken(userObj)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrTokenErr.Error(), http.StatusUnauthorized))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrTokenErr.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	jwtObj := JWT{Token: token}
-	json.NewEncoder(w).Encode(jwtObj)
+	ctx.JSON(http.StatusOK, jwtObj)
 }
 func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	var userObj user.User

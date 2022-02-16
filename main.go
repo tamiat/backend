@@ -15,26 +15,21 @@ import (
 	"log"
 )
 
-// @title Swagger Example API
-// @version 1.0
-// @description This is a documentation of our cms.
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host localhost:8080
-// @BasePath /api/v1
+// @securityDefinitions.apikey bearerAuth
+// @in header
+// @name Authorization
 func main() {
 	//load env variables
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+	docs.SwaggerInfo_swagger.Title = "Pragmatic Reviews - Video API"
+	docs.SwaggerInfo_swagger.Description = "Pragmatic Reviews - Youtube Video API."
+	docs.SwaggerInfo_swagger.Version = "1.0"
+	docs.SwaggerInfo_swagger.Host = "localhost:8080"
+	docs.SwaggerInfo_swagger.BasePath = "/api/v1"
+	docs.SwaggerInfo_swagger.Schemes = []string{"http"}
 
 	dbConnection, _ := driver.GetDbConnection()
 	auth := driver.InitAuthority(dbConnection)
@@ -46,6 +41,7 @@ func main() {
 	docs.SwaggerInfo_swagger.BasePath = "/api/v1"
 
 	server.POST("/api/v1/signup", userAPI.SignUpAPI)
+	server.POST("/api/v1/login", usertHandler.Login)
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	server.Run("localhost:8080")

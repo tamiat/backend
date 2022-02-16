@@ -25,10 +25,9 @@ func Start() {
 	origins := handlers.AllowedOrigins([]string{"*"})
 	dbConnection, sqlDBConnection := driver.GetDbConnection()
 	auth := driver.InitAuthority(dbConnection)
-	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection,auth))}
+	usertHandler := UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection, auth))}
 	ct := ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection, auth))}
-	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection ,auth))}
-
+	roleHandler := RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection, auth))}
 
 	router.Path("/api/v1/contentType/{userId:[0-9]+}").
 		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.createContentType)).Methods(http.MethodPost)
@@ -45,19 +44,17 @@ func Start() {
 	router.Path("/api/v1/contentType/delcol/{userId:[0-9]+}/{contentTypeId:[0-9]+}").
 		HandlerFunc(middleware.TokenVerifyMiddleWare(ct.deleteCol)).Methods(http.MethodPut)
 
-
 	router.HandleFunc("/api/v1/roles", roleHandler.Create).Methods(http.MethodPost)
 	router.HandleFunc("/api/v1/roles", middleware.TokenVerifyMiddleWare(roleHandler.Read)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/roles/{id:[0-9]+}", middleware.TokenVerifyMiddleWare(roleHandler.Delete)).Methods(http.MethodDelete)
 
-	router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
+	//router.HandleFunc("/api/v1/login", usertHandler.Login).Methods("POST")
 	//router.HandleFunc("/api/v1/signup", usertHandler.Signup).Methods("POST")
 	router.Path("/api/v1/confirmEmail/{id}").
 		HandlerFunc(usertHandler.VerifyEmail).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(headers, methods, origins)(router)))
 }
 
-func Tmp(){
+func Tmp() {
 	fmt.Println("hi ya roro :')")
 }
-
