@@ -43,13 +43,13 @@ func main() {
 	server := gin.New()
 	server.Use(gin.Recovery(), gin.Logger())
 
-	apiRoutes := server.Group(docs.SwaggerInfo_swagger.BasePath)
+	apiRoutes := server.Group("/api/vi")
 	{
-		server.POST("/signup", userAPI.SignUpAPI)
-		server.POST("/login", usertHandler.Login)
+		apiRoutes.POST("/signup", userAPI.SignUpAPI)
+		apiRoutes.POST("/login", usertHandler.Login)
 
-		server.POST("/roles", roleHandler.Create)
-		rolesRoutes := apiRoutes.Group("/roles", middleware.TokenVerifyMiddleWare)
+		apiRoutes.POST("/roles", roleHandler.Create)
+		rolesRoutes := apiRoutes.Group("/roles", middleware.TokenVerifyMiddleWare())
 		{
 			rolesRoutes.GET("", roleHandler.Read)
 			rolesRoutes.DELETE(":id", roleHandler.Delete)
