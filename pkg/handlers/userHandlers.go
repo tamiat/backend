@@ -29,8 +29,8 @@ type JWT struct {
 }
 
 type Login struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" form:"email" binding:"required,email"`
+	Password string `json:"password" form:"password" binding:"required"`
 }
 
 func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
@@ -96,9 +96,10 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
 //
 // @Summary Login endpoint
 // @Description Provide email and password to login, response is JWT
-// @Accept application/json
+// @Consume application/x-www-form-urlencoded
 // @Produce application/json
-// @Param login body handlers.Login true "Login"
+// @Param email formData string true "Email"
+// @Param password formData string true "Password"
 // @Success 200 {object} handlers.JWT
 // @Failure 400  {object}  errs.ErrResponse "Bad Request"
 // @Failure 404  {object}  errs.ErrResponse "User not found"
@@ -109,7 +110,7 @@ func (receiver UserHandlers) Login(ctx *gin.Context) {
 	var userObj user.User
 	var loginRequestData Login
 	//decoding request body
-	if err := ctx.ShouldBindJSON(&loginRequestData); err != nil {
+	if err := ctx.ShouldBind(&loginRequestData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

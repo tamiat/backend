@@ -19,22 +19,24 @@ const docTemplate_swagger = `{
         "/login": {
             "post": {
                 "description": "Provide email and password to login, response is JWT",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
                 "summary": "Login endpoint",
                 "parameters": [
                     {
-                        "description": "Login",
-                        "name": "login",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.Login"
-                        }
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -52,6 +54,85 @@ const docTemplate_swagger = `{
                     },
                     "401": {
                         "description": "Unauthorizes",
+                        "schema": {
+                            "$ref": "#/definitions/errs.ErrResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "returns all roles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "read roles endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/role.Role"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.ErrResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Provide role name to create new role",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create role endpoint",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/role.Role"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
                         "schema": {
                             "$ref": "#/definitions/errs.ErrResponse"
                         }
@@ -124,17 +205,16 @@ const docTemplate_swagger = `{
                 }
             }
         },
-        "handlers.Login": {
+        "role.Role": {
             "type": "object",
             "required": [
-                "email",
-                "password"
+                "name"
             ],
             "properties": {
-                "email": {
-                    "type": "string"
+                "id": {
+                    "type": "integer"
                 },
-                "password": {
+                "name": {
                     "type": "string"
                 }
             }

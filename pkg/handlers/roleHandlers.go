@@ -19,7 +19,7 @@ type RoleHandlers struct {
 func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 	var newRole role.Role
 	//decoding request body
-	if err := ctx.ShouldBindJSON(&newRole); err != nil {
+	if err := ctx.ShouldBind(&newRole); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -35,6 +35,15 @@ func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 
 }
 
+// @Security bearerAuth
+// @Summary read roles endpoint
+// @Description returns all roles
+// @Accept  application/json
+// @Produce  application/json
+// @Success 200 {array} role.Role
+// @Failure 401
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Router /roles [get]
 func (roleHandler RoleHandlers) Read(ctx *gin.Context) {
 	//w.Header().Add("Content-Type", "application/json")
 	var roles []role.Role

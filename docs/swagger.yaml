@@ -9,31 +9,32 @@ definitions:
       token:
         type: string
     type: object
-  handlers.Login:
+  role.Role:
     properties:
-      email:
-        type: string
-      password:
+      id:
+        type: integer
+      name:
         type: string
     required:
-    - email
-    - password
+    - name
     type: object
 info:
   contact: {}
 paths:
   /login:
     post:
-      consumes:
-      - application/json
       description: Provide email and password to login, response is JWT
       parameters:
-      - description: Login
-        in: body
-        name: login
+      - description: Email
+        in: formData
+        name: email
         required: true
-        schema:
-          $ref: '#/definitions/handlers.Login'
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -49,11 +50,62 @@ paths:
           description: Unauthorizes
           schema:
             $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/errs.ErrResponse'
       summary: Login endpoint
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: returns all roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/role.Role'
+            type: array
+        "401":
+          description: ""
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: read roles endpoint
+    post:
+      description: Provide role name to create new role
+      parameters:
+      - description: Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/role.Role'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Create role endpoint
   /signup:
     post:
       consumes:
