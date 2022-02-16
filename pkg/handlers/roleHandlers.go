@@ -16,6 +16,16 @@ type RoleHandlers struct {
 	Service service.RoleService
 }
 
+//
+// @Summary Create role endpoint
+// @Description Provide role name to create new role
+// @Consume application/x-www-form-urlencoded
+// @Produce application/json
+// @Param name formData string true "Name"
+// @Success 200 {object} role.Role
+// @Failure 500  {object}  errs.ErrResponse "Internal server error"
+// @Failure 400  {object}  errs.ErrResponse "Bad request"
+// @Router /roles [post]
 func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 	var newRole role.Role
 	//decoding request body
