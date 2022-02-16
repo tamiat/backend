@@ -9,6 +9,13 @@ definitions:
       token:
         type: string
     type: object
+  response.Response:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
   role.Role:
     properties:
       id:
@@ -123,7 +130,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/role.Role'
+            $ref: '#/definitions/response.Response'
         "400":
           description: Bad request
           schema:

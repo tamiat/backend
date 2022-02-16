@@ -174,7 +174,7 @@ const docTemplate_swagger = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/role.Role"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
@@ -251,6 +251,17 @@ const docTemplate_swagger = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },

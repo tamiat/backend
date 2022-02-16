@@ -162,7 +162,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/role.Role"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
@@ -239,6 +239,17 @@
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },

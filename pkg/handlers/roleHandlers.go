@@ -76,7 +76,7 @@ func (roleHandler RoleHandlers) Read(ctx *gin.Context) {
 // @Accept  application/json
 // @Produce  application/json
 // @Param  id path int true "Role ID"
-// @Success 200 {object} role.Role
+// @Success 200 {object} response.Response
 // @Failure 401
 // @Failure 500 {object} errs.ErrResponse "Internal server error"
 // @Failure 400 {object} errs.ErrResponse "Bad request"
