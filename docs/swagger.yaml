@@ -60,30 +60,6 @@ paths:
             $ref: '#/definitions/errs.ErrResponse'
       summary: Login endpoint
   /roles:
-    delete:
-      consumes:
-      - application/json
-      description: provide role id to delete the role
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/role.Role'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/errs.ErrResponse'
-        "401":
-          description: ""
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/errs.ErrResponse'
-      security:
-      - bearerAuth: []
-      summary: delete a role endpoint
     get:
       consumes:
       - application/json
@@ -130,6 +106,37 @@ paths:
           schema:
             $ref: '#/definitions/errs.ErrResponse'
       summary: Create role endpoint
+  /roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: provide role id to delete the role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/role.Role'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: ""
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: delete a role endpoint
   /signup:
     post:
       consumes:

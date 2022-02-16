@@ -144,7 +144,9 @@ const docTemplate_swagger = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/roles/{id}": {
             "delete": {
                 "security": [
                     {
@@ -159,6 +161,15 @@ const docTemplate_swagger = `{
                     "application/json"
                 ],
                 "summary": "delete a role endpoint",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

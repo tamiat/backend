@@ -75,11 +75,12 @@ func (roleHandler RoleHandlers) Read(ctx *gin.Context) {
 // @Description provide role id to delete the role
 // @Accept  application/json
 // @Produce  application/json
+// @Param  id path int true "Role ID"
 // @Success 200 {object} role.Role
 // @Failure 401
 // @Failure 500 {object} errs.ErrResponse "Internal server error"
 // @Failure 400 {object} errs.ErrResponse "Bad request"
-// @Router /roles [delete]
+// @Router /roles/{id} [delete]
 func (roleHandler RoleHandlers) Delete(ctx *gin.Context) {
 	// read id from path
 	id, err := strconv.Atoi(ctx.Param("id"))
