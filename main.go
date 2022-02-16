@@ -10,6 +10,7 @@ import (
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/driver"
 	"github.com/tamiat/backend/pkg/handlers"
+	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
 
 	"log"
@@ -34,14 +35,24 @@ func main() {
 	dbConnection, _ := driver.GetDbConnection()
 	auth := driver.InitAuthority(dbConnection)
 	usertHandler := handlers.UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection, auth))}
+
 	userAPI := api.NewUserAPI(usertHandler)
 
 	server := gin.New()
 	server.Use(gin.Recovery(), gin.Logger())
-	docs.SwaggerInfo_swagger.BasePath = "/api/v1"
 
-	server.POST("/api/v1/signup", userAPI.SignUpAPI)
-	server.POST("/api/v1/login", usertHandler.Login)
+	apiRoutes := server.Group(docs.SwaggerInfo_swagger.BasePath)
+	{
+		server.POST("/signup", userAPI.SignUpAPI)
+		server.POST("/login", usertHandler.Login)
+
+		server.POST("/roles")
+		rolesRoutes := apiRoutes.Group("/roles", middleware.TokenVerifyMiddleWare)
+		{
+			rolesRoutes.GET("")
+			rolesRoutes.DELETE(":id")
+		}
+	}
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	server.Run("localhost:8080")
