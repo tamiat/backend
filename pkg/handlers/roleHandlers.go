@@ -27,7 +27,7 @@ func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 		return
 	}
 	// creating role in db
-	id, err := roleHandler.service.Create(newRole)
+	id, err := roleHandler.Service.Create(newRole)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrDb.Error()})
 		return
@@ -38,23 +38,20 @@ func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 
 }
 
-func (roleHandler RoleHandlers) Read(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
+func (roleHandler RoleHandlers) Read(ctx *gin.Context) {
+	//w.Header().Add("Content-Type", "application/json")
 	var roles []role.Role
-	roles, err := roleHandler.service.Read()
+	roles, err := roleHandler.Service.Read()
 	//handling errors
 	if err == sql.ErrNoRows || len(roles) == 0 {
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoRolesFound.Error(), http.StatusOK))
+		ctx.JSON(http.StatusOK, errs.ErrNoRolesFound)
 		return
 	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, errs.ErrDb)
 		return
 	}
 	//sending the response
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(roles)
+	ctx.JSON(http.StatusOK, roles)
 }
 
 func (roleHandler RoleHandlers) Delete(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +59,7 @@ func (roleHandler RoleHandlers) Delete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r) // Get params
 	id := params["id"]
 	tempId, err := strconv.Atoi(id)
-	err = roleHandler.service.Delete(tempId)
+	err = roleHandler.Service.Delete(tempId)
 	//handling errors
 	if err != nil {
 		if err.Error() == `sql: no rows in result set` {
