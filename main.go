@@ -51,8 +51,8 @@ func main() {
 		server.POST("/roles", roleHandler.Create)
 		rolesRoutes := apiRoutes.Group("/roles", middleware.TokenVerifyMiddleWare)
 		{
-			rolesRoutes.GET("")
-			rolesRoutes.DELETE(":id")
+			rolesRoutes.GET("", roleHandler.Read)
+			rolesRoutes.DELETE(":id", roleHandler.Delete)
 		}
 	}
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
