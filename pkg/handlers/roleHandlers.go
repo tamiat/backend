@@ -2,12 +2,9 @@ package handlers
 
 import (
 	"database/sql"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 
 	"github.com/tamiat/backend/pkg/domain/role"
 	"github.com/tamiat/backend/pkg/errs"
@@ -54,24 +51,27 @@ func (roleHandler RoleHandlers) Read(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, roles)
 }
 
-func (roleHandler RoleHandlers) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	params := mux.Vars(r) // Get params
-	id := params["id"]
-	tempId, err := strconv.Atoi(id)
-	err = roleHandler.Service.Delete(tempId)
+func (roleHandler RoleHandlers) Delete(ctx *gin.Context) {
+	// read id from path
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errs.ErrParsingID)
+		return
+	}
+	err = roleHandler.Service.Delete(id)
 	//handling errors
 	if err != nil {
 		if err.Error() == `sql: no rows in result set` {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoRowsFound.Error(), http.StatusBadRequest))
+			ctx.JSON(http.StatusBadRequest, errs.ErrNoRolesFound)
+			return
 		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+			ctx.JSON(http.StatusInternalServerError, errs.ErrDb)
+			return
 		}
-		return
 	}
 	//sending the response
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponse("Role has been deleted successfully", http.StatusOK))
+	var responseObj response.Response
+	responseObj.Message = "Role has been deleted successfully"
+	responseObj.Status = http.StatusOK
+	ctx.JSON(http.StatusOK, responseObj)
 }

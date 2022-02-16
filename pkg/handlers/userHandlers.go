@@ -100,7 +100,8 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
 // @Produce application/json
 // @Param login body handlers.Login true "Login"
 // @Success 200 {object} handlers.JWT
-// @Failure 400  {object}  errs.ErrResponse "Bad Request
+// @Failure 400  {object}  errs.ErrResponse "Bad Request"
+// @Failure 404  {object}  errs.ErrResponse "User not found"
 // @Failure 401  {object}  errs.ErrResponse "Unauthorizes"
 // @Failure 500  {object}  errs.ErrResponse "Internal server error"
 // @Router /login [post]
@@ -120,7 +121,7 @@ func (receiver UserHandlers) Login(ctx *gin.Context) {
 	hashedPassword, err := receiver.Service.Login(userObj)
 	if err != nil {
 		if err == errs.ErrRecordNotFound {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrRecordNotFound.Error()})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": errs.ErrRecordNotFound.Error()})
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrDb.Error()})

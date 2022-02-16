@@ -4,6 +4,7 @@ import "errors"
 
 // here all errors are defined
 var (
+	ErrParsingID               = errors.New("invalid id")
 	ErrDb                      = errors.New("unexpected database error")
 	ErrContentTypeNotFound     = errors.New("content type not found")
 	ErrContentNotFound         = errors.New("content not found")
