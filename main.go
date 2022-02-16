@@ -7,6 +7,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/tamiat/backend/api"
 	"github.com/tamiat/backend/docs"
+	"github.com/tamiat/backend/pkg/domain/role"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/driver"
 	"github.com/tamiat/backend/pkg/handlers"
@@ -32,9 +33,10 @@ func main() {
 	docs.SwaggerInfo_swagger.BasePath = "/api/v1"
 	docs.SwaggerInfo_swagger.Schemes = []string{"http"}
 
-	dbConnection, _ := driver.GetDbConnection()
+	dbConnection, sqlDBConnection := driver.GetDbConnection()
 	auth := driver.InitAuthority(dbConnection)
 	usertHandler := handlers.UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection, auth))}
+	roleHandler := handlers.RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection, auth))}
 
 	userAPI := api.NewUserAPI(usertHandler)
 
@@ -46,7 +48,7 @@ func main() {
 		server.POST("/signup", userAPI.SignUpAPI)
 		server.POST("/login", usertHandler.Login)
 
-		server.POST("/roles")
+		server.POST("/roles", roleHandler.Create)
 		rolesRoutes := apiRoutes.Group("/roles", middleware.TokenVerifyMiddleWare)
 		{
 			rolesRoutes.GET("")

@@ -16,7 +16,7 @@ import (
 )
 
 type RoleHandlers struct {
-	service service.RoleService
+	Service service.RoleService
 }
 
 func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
