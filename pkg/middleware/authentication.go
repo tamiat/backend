@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -15,19 +16,35 @@ import (
 
 func TokenVerifyMiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		const BEARER_SCHEMA = "Bearer "
+		secret := fmt.Sprintf("%s", os.Getenv("JWT_SECRET"))
 		authHeader := c.GetHeader("Authorization")
-		tokenString := authHeader[len(BEARER_SCHEMA):]
-
-		token, err := validateToken(tokenString)
-
-		if token.Valid {
-			claims := token.Claims.(jwt.MapClaims)
-			fmt.Println(claims)
+		bearerToken := strings.Split(authHeader, " ")
+		if len(bearerToken) == 2 {
+			authToken := bearerToken[1]
+			token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, fmt.Errorf("There was an error")
+				}
+				return []byte(secret), nil
+			})
+			if err != nil {
+				//TODO
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+			if token.Valid {
+				claims := token.Claims.(jwt.MapClaims)
+				log.Println(claims)
+			} else {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
 		} else {
-			log.Println(err)
+			//TODO
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
+
 	}
 }
 func GenerateToken(user user.User) (string, error) {
@@ -53,6 +70,7 @@ func validateToken(tokenString string) (*jwt.Token, error) {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		// Return the secret signing key
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		secret := fmt.Sprintf("%s", os.Getenv("JWT_SECRET"))
+		return []byte(secret), nil
 	})
 }

@@ -43,7 +43,7 @@ func main() {
 	server := gin.New()
 	server.Use(gin.Recovery(), gin.Logger())
 
-	apiRoutes := server.Group("/api/vi")
+	apiRoutes := server.Group("/api/v1")
 	{
 		apiRoutes.POST("/signup", userAPI.SignUpAPI)
 		apiRoutes.POST("/login", usertHandler.Login)
