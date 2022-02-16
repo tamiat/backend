@@ -1,8 +1,8 @@
 package role
 
 type Role struct {
-	ID int `json:"id"`
-	Name string `json:"name"`
+	ID   int    `json:"id"`
+	Name string `json:"name" binding:"required"`
 }
 
 type RoleRepository interface {

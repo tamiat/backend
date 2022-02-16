@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 
@@ -18,21 +19,23 @@ type RoleHandlers struct {
 	service service.RoleService
 }
 
-func (roleHandler RoleHandlers) Create(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
+func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 	var newRole role.Role
-	_ = json.NewDecoder(r.Body).Decode(&newRole)
+	//decoding request body
+	if err := ctx.ShouldBindJSON(&newRole); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// creating role in db
 	id, err := roleHandler.service.Create(newRole)
-	//handling errors
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrDb.Error()})
 		return
 	}
 	newRole.ID = id
 	//sending the response
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(newRole)
+	ctx.JSON(http.StatusOK, newRole)
+
 }
 
 func (roleHandler RoleHandlers) Read(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +61,7 @@ func (roleHandler RoleHandlers) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	params := mux.Vars(r) // Get params
 	id := params["id"]
-	tempId ,err := strconv.Atoi(id)
+	tempId, err := strconv.Atoi(id)
 	err = roleHandler.service.Delete(tempId)
 	//handling errors
 	if err != nil {

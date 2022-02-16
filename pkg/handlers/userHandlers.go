@@ -108,7 +108,7 @@ func (receiver UserHandlers) Login(ctx *gin.Context) {
 	var userObj user.User
 	var loginRequestData Login
 	//decoding request body
-	if err := ctx.ShouldBind(&loginRequestData); err != nil {
+	if err := ctx.ShouldBindJSON(&loginRequestData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
