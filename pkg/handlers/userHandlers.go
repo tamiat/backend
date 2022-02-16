@@ -21,7 +21,7 @@ import (
 )
 
 type UserHandlers struct {
-	service service.UserService
+	Service service.UserService
 }
 
 type JWT struct {
@@ -54,7 +54,7 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
 	}
 	userObj.Password = string(hash)
 	//database connection
-	userObj.ID, err = receiver.service.Signup(userObj)
+	userObj.ID, err = receiver.Service.Signup(userObj)
 	if err != nil {
 		fmt.Println("mn eel service ya rahmaaa")
 		return userObj, http.StatusInternalServerError, err
@@ -74,7 +74,7 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
 
 	}
 	userObj.Otp = string(hashOTP)
-	err = receiver.service.InsertOTP(userObj)
+	err = receiver.Service.InsertOTP(userObj)
 	if err != nil {
 		//w.WriteHeader(http.StatusInternalServerError)
 		//json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
@@ -97,7 +97,7 @@ func (receiver UserHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusBadRequest))
 		return
 	}
-	hashedPassword, err := receiver.service.Login(userObj)
+	hashedPassword, err := receiver.Service.Login(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
@@ -142,14 +142,14 @@ func (receiver UserHandlers) VerifyEmail(w http.ResponseWriter, r *http.Request)
 	intId, err := strconv.Atoi(id)
 	fmt.Println(intId)
 	userObj.ID = intId
-	hashedOTP, err := receiver.service.ReadOTP(userObj)
+	hashedOTP, err := receiver.Service.ReadOTP(userObj)
 	err = bcrypt.CompareHashAndPassword([]byte(hashedOTP), []byte(otp))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrInvalidVerificationCode.Error(), http.StatusUnauthorized))
 		return
 	}
-	err = receiver.service.VerifyEmail(userObj)
+	err = receiver.Service.VerifyEmail(userObj)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errs.ErrDb)

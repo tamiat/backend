@@ -5,6 +5,9 @@ import (
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/driver"
 	"github.com/tamiat/backend/pkg/service"
+	//swaggerfiles "github.com/swaggo/files"
+	//ginSwagger "github.com/swaggo/gin-swagger"
+	//docs "github.com/tamiat/backend/docs"
 )
 
 func TestStart() {
