@@ -197,3 +197,44 @@ func (ch *ContentTypeHandlers) addCol(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+func (ch *ContentTypeHandlers) deleteCol(ctx *gin.Context) {
+	type ColumnName struct {
+		ColumnName string `json:"column_name" binding:"required"`
+	}
+	// To use the converted data we will need to convert it
+	// into a map[string]interface{}
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	var colNameObj = ColumnName{}
+	err = ctx.ShouldBindJSON(colNameObj)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err = ch.Service.DeleteCol(userId, contentTypeId, colNameObj.ColumnName)
+	if err != nil {
+		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else if err == errs.ErrUnauthorized {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	res := response.Response{
+		Message: "This column has been deleted successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
+}
