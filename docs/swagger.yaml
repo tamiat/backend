@@ -1,7 +1,23 @@
 definitions:
+  contentType.ContentTypeExample:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      title:
+        type: string
+    type: object
   errs.ErrResponse:
     properties:
       error:
+        type: string
+    type: object
+  handlers.ID:
+    properties:
+      table_id:
         type: string
     type: object
   handlers.JWT:
@@ -28,6 +44,208 @@ definitions:
 info:
   contact: {}
 paths:
+  /contentType/{userId}:
+    post:
+      consumes:
+      - application/json
+      description: takes user id as path param to check his role and see if he is
+        authorized to do this action, name is a required attribute
+      parameters:
+      - description: Content Type body
+        in: body
+        name: contentType
+        required: true
+        schema:
+          $ref: '#/definitions/contentType.ContentTypeExample'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ID'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Create content type endpoint
+  /contentType/{userId}/{contentTypeId}:
+    delete:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to delete content type
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: delete content type endpoint
+  /contentType/addcol/{userId}/{contentTypeId}:
+    put:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to add new column
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: adds column endpoint
+  /contentType/delcol/{userId}/{contentTypeId}:
+    delete:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to delete a column
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: deletes column endpoint
+  /contentType/renamecol/{userId}/{contentTypeId}:
+    put:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to update name of content
+        type column
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: updates column name endpoint
   /login:
     post:
       description: Provide email and password to login, response is JWT
