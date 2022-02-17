@@ -252,6 +252,19 @@ func (ch *ContentTypeHandlers) AddCol(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Security bearerAuth
+// @Summary deletes column endpoint
+// @Description takes userId and content type Id in path to delete a column
+// @Accept  application/json
+// @Produce  application/json
+// @Param  userId path int true "User ID"
+// @Param  contentTypeId path int true "Content Type ID"
+// @Success 200 {object} response.Response
+// @Failure 401 object} errs.ErrResponse "Unauthorized"
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 404 {object} errs.ErrResponse "Content type not found"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /contentType/delcol/{userId}/{contentTypeId} [delete]
 func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 	type ColumnName struct {
 		ColumnName string `json:"column_name" binding:"required"`
