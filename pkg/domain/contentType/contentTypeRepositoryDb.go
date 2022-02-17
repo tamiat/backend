@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/harranali/authority"
 	"gorm.io/gorm"
+	"log"
 
 	"github.com/tamiat/backend/pkg/errs"
 )
@@ -46,15 +47,18 @@ func (r ContentTypeRepositoryDb) Create(intUserId int, n, cols string) (string, 
 	}
 	_, err = r.sqlDB.Exec("INSERT INTO contentType (name) VALUES ($1)", n)
 	if err != nil {
+		log.Println(err)
 		return "", errs.ErrDb
 	}
 	_, err = r.sqlDB.Exec("CREATE TABLE " + n + "(" + cols + ")")
 	if err != nil {
+		log.Println(err)
 		return "", errs.ErrDb
 	}
 	var id string
 	err = r.sqlDB.QueryRow("SELECT currval(pg_get_serial_sequence('contentType','id'));").Scan(&id)
 	if err != nil {
+		log.Println(err)
 		return "", errs.ErrDb
 	}
 	return id, nil
