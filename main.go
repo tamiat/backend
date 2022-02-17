@@ -7,6 +7,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/tamiat/backend/api"
 	"github.com/tamiat/backend/docs"
+	"github.com/tamiat/backend/pkg/domain/contentType"
 	"github.com/tamiat/backend/pkg/domain/role"
 	"github.com/tamiat/backend/pkg/domain/user"
 	"github.com/tamiat/backend/pkg/driver"
@@ -37,7 +38,7 @@ func main() {
 	auth := driver.InitAuthority(dbConnection)
 	usertHandler := handlers.UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection, auth))}
 	roleHandler := handlers.RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection, auth))}
-
+	contentTypeHandler := handlers.ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection, auth))}
 	userAPI := api.NewUserAPI(usertHandler)
 
 	server := gin.New()
@@ -53,6 +54,10 @@ func main() {
 		{
 			rolesRoutes.GET("", roleHandler.Read)
 			rolesRoutes.DELETE(":id", roleHandler.Delete)
+		}
+		contentTypeRoutes := apiRoutes.Group("contentType", middleware.TokenVerifyMiddleWare())
+		{
+			contentTypeRoutes.POST(":id", contentTypeHandler.CreateContentType)
 		}
 	}
 

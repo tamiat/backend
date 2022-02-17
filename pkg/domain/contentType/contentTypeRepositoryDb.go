@@ -3,8 +3,6 @@ package contentType
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
-
 	"github.com/harranali/authority"
 	"gorm.io/gorm"
 
@@ -62,8 +60,8 @@ func (r ContentTypeRepositoryDb) Create(intUserId int, n, cols string) (string, 
 	return id, nil
 }
 
-func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error {
-	intUserId, err := strconv.Atoi(userId)
+func (r ContentTypeRepositoryDb) DeleteById(intUserId int, contentTypeId string) error {
+	//intUserId, err := strconv.Atoi(userId)
 	role, err := r.auth.CheckRole(uint(intUserId), "super admin")
 	if !role {
 		return errs.ErrUnauthorized
@@ -86,8 +84,8 @@ func (r ContentTypeRepositoryDb) DeleteById(userId, contentTypeId string) error 
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) UpdateColName(userId, contentTypeId, oldName, newName string) error {
-	intUserId, err := strconv.Atoi(userId)
+func (r ContentTypeRepositoryDb) UpdateColName(intUserId int, contentTypeId, oldName, newName string) error {
+	//intUserId, err := strconv.Atoi(userId)
 	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
 	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
 	role3, err := r.auth.CheckRole(uint(intUserId), "others")
@@ -110,8 +108,8 @@ func (r ContentTypeRepositoryDb) UpdateColName(userId, contentTypeId, oldName, n
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) AddCol(userId, contentTypeId, col string) error {
-	intUserId, err := strconv.Atoi(userId)
+func (r ContentTypeRepositoryDb) AddCol(intUserId int, contentTypeId, col string) error {
+	//intUserId, err := strconv.Atoi(userId)
 	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
 	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
 	role3, err := r.auth.CheckRole(uint(intUserId), "others")
@@ -130,8 +128,8 @@ func (r ContentTypeRepositoryDb) AddCol(userId, contentTypeId, col string) error
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) DeleteCol(userId, contentTypeId, col string) error {
-	intUserId, err := strconv.Atoi(userId)
+func (r ContentTypeRepositoryDb) DeleteCol(intUserId int, contentTypeId, col string) error {
+	//intUserId, err := strconv.Atoi(userId)
 	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
 	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
 	role3, err := r.auth.CheckRole(uint(intUserId), "others")

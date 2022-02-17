@@ -11,10 +11,10 @@ import (
 )
 
 type ContentTypeHandlers struct {
-	service service.ContentTypeService
+	Service service.ContentTypeService
 }
 
-func (ch *ContentTypeHandlers) createContentType(ctx *gin.Context) {
+func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
 	var newContentType map[string]interface{}
 	err := ctx.ShouldBind(&newContentType)
 	if err != nil {
@@ -33,7 +33,7 @@ func (ch *ContentTypeHandlers) createContentType(ctx *gin.Context) {
 	/*buffer, err := ioutil.ReadAll(r.Body)
 	err = r.Body.Close()
 	err = json.Unmarshal(buffer, &newContentType)
-	m := newContentType.(map[string]interface{})*/// To use the converted data we will need to convert it
+	m := newContentType.(map[string]interface{})*/ // To use the converted data we will need to convert it
 	// into a map[string]interface{}
 	var name, col string
 	name = ""
@@ -53,7 +53,7 @@ func (ch *ContentTypeHandlers) createContentType(ctx *gin.Context) {
 	}
 	col = col[0 : len(col)-1]
 	var id string
-	id, err = ch.service.CreateContentType(userId, name, col)
+	id, err = ch.Service.CreateContentType(userId, name, col)
 	if err != nil {
 		if err == errs.ErrUnauthorized {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrUnauthorized.Error()})
