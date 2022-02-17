@@ -18,6 +18,7 @@ var (
 	ErrUnexpected              = errors.New("unexpected error")
 	ErrInvalidToken            = errors.New("invalid token")
 	ErrColumnName              = errors.New("no specific column name was sent")
+	ErrColumnNameMoreThanOne   = errors.New("more than one column name specified")
 	ErrColNotFound             = errors.New("column not found")
 	ErrNoContentTypeName       = errors.New("there is no content type name")
 	ErrDuplicateValue          = errors.New("this value already exists")
