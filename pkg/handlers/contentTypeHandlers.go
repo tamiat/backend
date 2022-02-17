@@ -145,3 +145,55 @@ func (ch *ContentTypeHandlers) updateColName(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+func (ch *ContentTypeHandlers) addCol(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	var newContentType map[string]interface{}
+	err = ctx.ShouldBind(&newContentType)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var col string
+	i := 0
+	for key, element := range newContentType {
+		i++
+		col += key
+		col += " "
+		col += strings.TrimSpace(element.(string))
+	}
+	if i < 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnName.Error()})
+		return
+	}
+	if i > 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnNameMoreThanOne.Error()})
+		return
+	}
+	err = ch.Service.AddCol(userId, contentTypeId, col)
+	if err != nil {
+		if err == errs.ErrContentTypeNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else if err == errs.ErrUnauthorized {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
+		return
+	}
+	res := response.Response{
+		Message: "This new column has been added successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
+}
