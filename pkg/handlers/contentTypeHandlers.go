@@ -19,6 +19,17 @@ type ID struct {
 	ID string `json:"table_id"`
 }
 
+//
+// @Summary Create content type endpoint
+// @Description takes user id as path param to check his role and see if he is authorized to do this action, name is a required attribute
+// @Accept application/json
+// @Produce application/json
+// @Param contentType body contentType.ContentTypeExample true "Content Type body"
+// @Success 200 {object} handlers.ID
+// @Failure 500  {object}  errs.ErrResponse "Internal server error"
+// @Failure 400  {object}  errs.ErrResponse "Bad request"
+// @Failure 401  {object}  errs.ErrResponse "Unauthorized error"
+// @Router /contentType/{userId} [post]
 func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
 	var newContentType map[string]interface{}
 	err := ctx.ShouldBind(&newContentType)
