@@ -19,7 +19,7 @@ type ID struct {
 	ID string `json:"table_id"`
 }
 
-//
+// @Security bearerAuth
 // @Summary Create content type endpoint
 // @Description takes user id as path param to check his role and see if he is authorized to do this action, name is a required attribute
 // @Accept application/json
@@ -129,6 +129,7 @@ func (ch *ContentTypeHandlers) DeleteContentType(ctx *gin.Context) {
 // @Produce  application/json
 // @Param  userId path int true "User ID"
 // @Param  contentTypeId path int true "Content Type ID"
+// @Param columnName body handlers.ColumnNameExample true "oldname :  newname"
 // @Success 200 {object} response.Response
 // @Failure 401 object} errs.ErrResponse "Unauthorized"
 // @Failure 500 {object} errs.ErrResponse "Internal server error"
@@ -257,20 +258,19 @@ func (ch *ContentTypeHandlers) AddCol(ctx *gin.Context) {
 // @Security bearerAuth
 // @Summary deletes column endpoint
 // @Description takes userId and content type Id in path to delete a column
-// @Accept  application/json
+// @Consume application/x-www-form-urlencoded
 // @Produce  application/json
 // @Param  userId path int true "User ID"
 // @Param  contentTypeId path int true "Content Type ID"
+// @Param name formData string true "Column Name"
 // @Success 200 {object} response.Response
 // @Failure 401 object} errs.ErrResponse "Unauthorized"
 // @Failure 500 {object} errs.ErrResponse "Internal server error"
 // @Failure 404 {object} errs.ErrResponse "Content type not found"
 // @Failure 400 {object} errs.ErrResponse "Bad request"
-// @Router /contentType/delcol/{userId}/{contentTypeId} [delete]
+// @Router /contentType/delcol/{userId}/{contentTypeId} [put]
 func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
-	type ColumnName struct {
-		ColumnName string `json:"column_name" binding:"required"`
-	}
+
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
@@ -283,11 +283,12 @@ func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 		return
 	}
 	var colNameObj = ColumnName{}
-	err = ctx.ShouldBindJSON(&colNameObj)
+	err = ctx.ShouldBind(&colNameObj)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	log.Println(colNameObj.ColumnName)
 	err = ch.Service.DeleteCol(userId, contentTypeId, colNameObj.ColumnName)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
@@ -309,4 +310,8 @@ func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 
 type ColumnNameExample struct {
 	Name string `json:"name"`
+}
+
+type ColumnName struct {
+	ColumnName string `json:"name" form:"name" binding:"required"`
 }

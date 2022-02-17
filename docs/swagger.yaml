@@ -15,6 +15,11 @@ definitions:
       error:
         type: string
     type: object
+  handlers.ColumnNameExample:
+    properties:
+      name:
+        type: string
+    type: object
   handlers.ID:
     properties:
       table_id:
@@ -81,6 +86,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
       summary: Create content type endpoint
   /contentType/{userId}/{contentTypeId}:
     delete:
@@ -140,6 +147,12 @@ paths:
         name: contentTypeId
         required: true
         type: integer
+      - description: 'column name : its type'
+        in: body
+        name: columnName
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ColumnNameExample'
       produces:
       - application/json
       responses:
@@ -167,9 +180,7 @@ paths:
       - bearerAuth: []
       summary: adds column endpoint
   /contentType/delcol/{userId}/{contentTypeId}:
-    delete:
-      consumes:
-      - application/json
+    put:
       description: takes userId and content type Id in path to delete a column
       parameters:
       - description: User ID
@@ -182,6 +193,11 @@ paths:
         name: contentTypeId
         required: true
         type: integer
+      - description: Column Name
+        in: formData
+        name: name
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -225,6 +241,12 @@ paths:
         name: contentTypeId
         required: true
         type: integer
+      - description: 'oldname :  newname'
+        in: body
+        name: columnName
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ColumnNameExample'
       produces:
       - application/json
       responses:

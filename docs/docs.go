@@ -45,6 +45,15 @@ const docTemplate_swagger = `{
                         "name": "contentTypeId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "column name : its type",
+                        "name": "columnName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ColumnNameExample"
+                        }
                     }
                 ],
                 "responses": {
@@ -82,16 +91,13 @@ const docTemplate_swagger = `{
             }
         },
         "/contentType/delcol/{userId}/{contentTypeId}": {
-            "delete": {
+            "put": {
                 "security": [
                     {
                         "bearerAuth": []
                     }
                 ],
                 "description": "takes userId and content type Id in path to delete a column",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -109,6 +115,13 @@ const docTemplate_swagger = `{
                         "description": "Content Type ID",
                         "name": "contentTypeId",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Column Name",
+                        "name": "name",
+                        "in": "formData",
                         "required": true
                     }
                 ],
@@ -175,6 +188,15 @@ const docTemplate_swagger = `{
                         "name": "contentTypeId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "oldname :  newname",
+                        "name": "columnName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ColumnNameExample"
+                        }
                     }
                 ],
                 "responses": {
@@ -213,6 +235,11 @@ const docTemplate_swagger = `{
         },
         "/contentType/{userId}": {
             "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
                 "description": "takes user id as path param to check his role and see if he is authorized to do this action, name is a required attribute",
                 "consumes": [
                     "application/json"
@@ -575,6 +602,14 @@ const docTemplate_swagger = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ColumnNameExample": {
+            "type": "object",
+            "properties": {
+                "name": {
                     "type": "string"
                 }
             }
