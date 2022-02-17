@@ -121,6 +121,19 @@ func (ch *ContentTypeHandlers) DeleteContentType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Security bearerAuth
+// @Summary updates column name endpoint
+// @Description takes userId and content type Id in path to update name of content type column
+// @Accept  application/json
+// @Produce  application/json
+// @Param  userId path int true "User ID"
+// @Param  contentTypeId path int true "Content Type ID"
+// @Success 200 {object} response.Response
+// @Failure 401 object} errs.ErrResponse "Unauthorized"
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 404 {object} errs.ErrResponse "Content type not found"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /contentType/renamecol/{userId}/{contentTypeId} [put]
 func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
