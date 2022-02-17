@@ -223,6 +223,13 @@ const docTemplate_swagger = `{
                 "summary": "Create content type endpoint",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "Content Type body",
                         "name": "contentType",
                         "in": "body",

@@ -51,6 +51,11 @@ paths:
       description: takes user id as path param to check his role and see if he is
         authorized to do this action, name is a required attribute
       parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
       - description: Content Type body
         in: body
         name: contentType

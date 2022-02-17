@@ -24,6 +24,7 @@ type ID struct {
 // @Description takes user id as path param to check his role and see if he is authorized to do this action, name is a required attribute
 // @Accept application/json
 // @Produce application/json
+// @Param  userId path int true "User ID"
 // @Param contentType body contentType.ContentTypeExample true "Content Type body"
 // @Success 200 {object} handlers.ID
 // @Failure 500  {object}  errs.ErrResponse "Internal server error"
@@ -193,6 +194,7 @@ func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
 // @Produce  application/json
 // @Param  userId path int true "User ID"
 // @Param  contentTypeId path int true "Content Type ID"
+// @Param columnName body handlers.ColumnNameExample true "column name : its type"
 // @Success 200 {object} response.Response
 // @Failure 401 object} errs.ErrResponse "Unauthorized"
 // @Failure 500 {object} errs.ErrResponse "Internal server error"
@@ -305,9 +307,6 @@ func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-type ContentTypeExample struct {
-	Name        string `json:"name"`
-	Id          string `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+type ColumnNameExample struct {
+	Name string `json:"name"`
 }
