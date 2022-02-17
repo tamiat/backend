@@ -40,8 +40,7 @@ func (r ContentTypeRepositoryDb) isColExists(tableName string, colName string) e
 	return nil
 }
 
-func (r ContentTypeRepositoryDb) Create(userId, n, cols string) (string, error) {
-	intUserId, err := strconv.Atoi(userId)
+func (r ContentTypeRepositoryDb) Create(intUserId int, n, cols string) (string, error) {
 	role1, err := r.auth.CheckRole(uint(intUserId), "super admin")
 	role2, err := r.auth.CheckRole(uint(intUserId), "admin")
 	if !role1 && !role2 {

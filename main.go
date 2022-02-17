@@ -55,6 +55,7 @@ func main() {
 			rolesRoutes.DELETE(":id", roleHandler.Delete)
 		}
 	}
+
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	server.Run("localhost:8080")

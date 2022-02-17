@@ -5,34 +5,34 @@ import (
 )
 
 type ContentTypeService interface {
-	CreateContentType(string, string, string) (string, error)
-	DeleteContentType(string, string) error
-	UpdateColName(string, string, string, string) error
-	AddCol(string, string, string) error
-	DeleteCol(string, string, string) error
+	CreateContentType(int, string, string) (string, error)
+	DeleteContentType(int, string) error
+	UpdateColName(int, string, string, string) error
+	AddCol(int, string, string) error
+	DeleteCol(int, string, string) error
 }
 
 type DefaultContentTypeService struct {
 	repo contentType.ContentTypeRepository
 }
 
-func (s DefaultContentTypeService) CreateContentType(userId, name, cols string) (string, error) {
+func (s DefaultContentTypeService) CreateContentType(userId int, name, cols string) (string, error) {
 	return s.repo.Create(userId, name, cols)
 }
 
-func (s DefaultContentTypeService) DeleteContentType(userId, contentTypeId string) error {
+func (s DefaultContentTypeService) DeleteContentType(userId int, contentTypeId string) error {
 	return s.repo.DeleteById(userId, contentTypeId)
 }
 
-func (s DefaultContentTypeService) UpdateColName(userId, contentTypeId, oldName, newName string)  error {
+func (s DefaultContentTypeService) UpdateColName(userId int, contentTypeId, oldName, newName string) error {
 	return s.repo.UpdateColName(userId, contentTypeId, oldName, newName)
 }
 
-func (s DefaultContentTypeService) AddCol(userId, contentTypeId, col string) error {
+func (s DefaultContentTypeService) AddCol(userId int, contentTypeId, col string) error {
 	return s.repo.AddCol(userId, contentTypeId, col)
 }
 
-func (s DefaultContentTypeService) DeleteCol(userId, contentTypeId, col string) error {
+func (s DefaultContentTypeService) DeleteCol(userId int, contentTypeId, col string) error {
 	return s.repo.DeleteCol(userId, contentTypeId, col)
 }
 
