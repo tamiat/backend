@@ -94,3 +94,54 @@ func (ch *ContentTypeHandlers) deleteContentType(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+func (ch *ContentTypeHandlers) updateColName(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	var newContentType map[string]interface{}
+	err = ctx.ShouldBind(&newContentType)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	i := 0
+	var oldName, newName string
+	for key, element := range newContentType {
+		i++
+		oldName = key
+		newName = strings.TrimSpace(element.(string))
+	}
+	if i < 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnName.Error()})
+		return
+	}
+	if i > 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnNameMoreThanOne.Error()})
+		return
+	}
+	err = ch.Service.UpdateColName(userId, contentTypeId, oldName, newName)
+	if err != nil {
+		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": errs.ErrColNotFound})
+			return
+		} else if err == errs.ErrUnauthorized {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrUnauthorized.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errs.ErrServerErr.Error())
+		return
+	}
+	res := response.Response{
+		Message: "This column has been renamed successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
+}
