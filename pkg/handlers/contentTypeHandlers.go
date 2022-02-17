@@ -63,7 +63,7 @@ func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, IDobj)
 	return
 }
-func (ch *ContentTypeHandlers) deleteContentType(ctx *gin.Context) {
+func (ch *ContentTypeHandlers) DeleteContentType(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
@@ -94,7 +94,7 @@ func (ch *ContentTypeHandlers) deleteContentType(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
-func (ch *ContentTypeHandlers) updateColName(ctx *gin.Context) {
+func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
@@ -145,7 +145,7 @@ func (ch *ContentTypeHandlers) updateColName(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
-func (ch *ContentTypeHandlers) addCol(ctx *gin.Context) {
+func (ch *ContentTypeHandlers) AddCol(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
@@ -197,7 +197,7 @@ func (ch *ContentTypeHandlers) addCol(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
-func (ch *ContentTypeHandlers) deleteCol(ctx *gin.Context) {
+func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 	type ColumnName struct {
 		ColumnName string `json:"column_name" binding:"required"`
 	}

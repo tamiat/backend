@@ -55,10 +55,13 @@ func main() {
 			rolesRoutes.GET("", roleHandler.Read)
 			rolesRoutes.DELETE(":id", roleHandler.Delete)
 		}
-		contentTypeRoutes := apiRoutes.Group("contentType", middleware.TokenVerifyMiddleWare())
+		contentTypeRoutes := apiRoutes.Group("/contentType", middleware.TokenVerifyMiddleWare())
 		{
-			contentTypeRoutes.POST(":id", contentTypeHandler.CreateContentType)
-		}
+			contentTypeRoutes.POST("/:userId", contentTypeHandler.CreateContentType)
+			contentTypeRoutes.DELETE("/:userId/:contentTypeId", contentTypeHandler.DeleteContentType)
+			contentTypeRoutes.PUT("/renamecol/:userId/:contentTypeId", contentTypeHandler.UpdateColName)
+			contentTypeRoutes.PUT("/addcol/:userId/:contentTypeId", contentTypeHandler.AddCol)
+			contentTypeRoutes.PUT("/delcol/:userId/:contentTypeId", contentTypeHandler.DeleteCol)
 	}
 
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
