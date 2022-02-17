@@ -4,6 +4,12 @@ type ContentType struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+type ContentTypeExample struct {
+	Name        string `json:"name"`
+	Id          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
 
 type ContentTypeRepository interface {
 

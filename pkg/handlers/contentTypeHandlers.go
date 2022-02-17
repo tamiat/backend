@@ -15,6 +15,9 @@ import (
 type ContentTypeHandlers struct {
 	Service service.ContentTypeService
 }
+type ID struct {
+	ID string `json:"table_id"`
+}
 
 func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
 	var newContentType map[string]interface{}
@@ -23,7 +26,7 @@ func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	userId, err := strconv.Atoi(ctx.Param("id"))
+	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
 		return
@@ -55,14 +58,13 @@ func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
 		return
 	}
-	type ID struct {
-		ID string `json:"id"`
-	}
+
 	var IDobj ID
 	IDobj.ID = id
 	ctx.JSON(http.StatusOK, IDobj)
 	return
 }
+
 func (ch *ContentTypeHandlers) DeleteContentType(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
@@ -94,6 +96,7 @@ func (ch *ContentTypeHandlers) DeleteContentType(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+
 func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
@@ -130,13 +133,13 @@ func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
 	err = ch.Service.UpdateColName(userId, contentTypeId, oldName, newName)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": errs.ErrColNotFound})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": errs.ErrColNotFound.Error()})
 			return
 		} else if err == errs.ErrUnauthorized {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrUnauthorized.Error()})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errs.ErrServerErr.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
 		return
 	}
 	res := response.Response{
@@ -145,6 +148,7 @@ func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+
 func (ch *ContentTypeHandlers) AddCol(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
@@ -197,12 +201,11 @@ func (ch *ContentTypeHandlers) AddCol(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+
 func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 	type ColumnName struct {
 		ColumnName string `json:"column_name" binding:"required"`
 	}
-	// To use the converted data we will need to convert it
-	// into a map[string]interface{}
 	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
@@ -215,7 +218,7 @@ func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 		return
 	}
 	var colNameObj = ColumnName{}
-	err = ctx.ShouldBindJSON(colNameObj)
+	err = ctx.ShouldBindJSON(&colNameObj)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -237,4 +240,11 @@ func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
 		Status:  200,
 	}
 	ctx.JSON(http.StatusOK, res)
+}
+
+type ContentTypeExample struct {
+	Name        string `json:"name"`
+	Id          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }

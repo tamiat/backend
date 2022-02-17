@@ -62,6 +62,7 @@ func main() {
 			contentTypeRoutes.PUT("/renamecol/:userId/:contentTypeId", contentTypeHandler.UpdateColName)
 			contentTypeRoutes.PUT("/addcol/:userId/:contentTypeId", contentTypeHandler.AddCol)
 			contentTypeRoutes.PUT("/delcol/:userId/:contentTypeId", contentTypeHandler.DeleteCol)
+		}
 	}
 
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
