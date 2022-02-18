@@ -528,40 +528,51 @@
         },
         "/signup": {
             "post": {
-                "description": "get string by ID",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Provide email and password to login, response is JWT",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Add a new pet to the store",
+                "summary": "Signup endpoint",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Some ID",
-                        "name": "some_id",
-                        "in": "path",
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Role",
+                        "name": "role",
+                        "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handlers.JWT"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/errs.ErrResponse"
                         }
                     },
-                    "404": {
-                        "description": "ok",
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/errs.ErrResponse"
                         }
                     }
                 }

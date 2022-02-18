@@ -32,65 +32,70 @@ type Login struct {
 	Email    string `json:"email" form:"email" binding:"required,email"`
 	Password string `json:"password" form:"password" binding:"required"`
 }
+type Signup struct {
+	Email    string `json:"email" form:"email" binding:"required,email"`
+	Password string `json:"password" form:"password" binding:"required"`
+	Role     string `json:"role" form:"role" binding:"required"`
+}
 
-func (receiver UserHandlers) Signup(ctx *gin.Context) (user.User, int, error) {
-	//w.Header().Set("Content-Type", "application/json")
-	//extracting usr obj
+//
+// @Summary Signup endpoint
+// @Description Provide email and password to login, response is JWT
+// @Consume application/x-www-form-urlencoded
+// @Produce application/json
+// @Param email formData string true "Email"
+// @Param password formData string true "Password"
+// @Param role formData string true "Role"
+// @Success 200 {object} handlers.JWT
+// @Failure 400  {object}  errs.ErrResponse "Bad Request"
+// @Failure 500  {object}  errs.ErrResponse "Internal server error"
+// @Router /signup [post]
+func (receiver UserHandlers) Signup(ctx *gin.Context) {
 	var userObj user.User
-	err := ctx.ShouldBindJSON(&userObj)
-	//json.NewDecoder(r.Body).Decode(&userObj)
-	//validating email and password
-	if err != nil {
-		return userObj, http.StatusBadRequest, err
-	}
-	/*err = validateEmailAndPassword(userObj)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusBadRequest))
+	var signupRequestData Signup
+	//decoding request body
+
+	if err := ctx.ShouldBind(&signupRequestData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}*/
+	}
 	//encrypting password
 	hash, err := bcrypt.GenerateFromPassword([]byte(userObj.Password), 10)
 	if err != nil {
-		//TODO check if this is right
-		//w.WriteHeader(http.StatusInternalServerError)
-		//json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(), http.StatusInternalServerError))
-		return userObj, http.StatusInternalServerError, err
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	userObj.Password = string(hash)
 	//database connection
 	userObj.ID, err = receiver.Service.Signup(userObj)
 	if err != nil {
-		fmt.Println("mn eel service ya rahmaaa")
-		return userObj, http.StatusInternalServerError, err
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	code, err := emailVerification.SendEmail(userObj.Email)
 	if err != nil {
-		//w.WriteHeader(http.StatusInternalServerError)
-		//json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
-		return userObj, http.StatusInternalServerError, err
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	hashOTP, err := bcrypt.GenerateFromPassword([]byte(code), 10)
 	if err != nil {
-		//w.WriteHeader(http.StatusInternalServerError)
-		//json.NewEncoder(w).Encode(response.NewResponse(errs.ErrServerErr.Error(), http.StatusInternalServerError))
-		return userObj, http.StatusInternalServerError, err
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 
 	}
 	userObj.Otp = string(hashOTP)
 	err = receiver.Service.InsertOTP(userObj)
 	if err != nil {
-		//w.WriteHeader(http.StatusInternalServerError)
-		//json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
-		return userObj, http.StatusInternalServerError, err
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 
 	}
 	//w.WriteHeader(http.StatusOK)
 	userObj.Password = ""
 	userObj.Otp = ""
 	//json.NewEncoder(w).Encode(userObj)
-	return userObj, http.StatusOK, nil
+	ctx.JSON(http.StatusOK, userObj)
 }
 
 //

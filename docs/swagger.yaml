@@ -391,31 +391,39 @@ paths:
       summary: delete a role endpoint
   /signup:
     post:
-      consumes:
-      - application/json
-      description: get string by ID
+      description: Provide email and password to login, response is JWT
       parameters:
-      - description: Some ID
-        in: path
-        name: some_id
+      - description: Email
+        in: formData
+        name: email
         required: true
-        type: integer
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Role
+        in: formData
+        name: role
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: ok
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/handlers.JWT'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
-        "404":
-          description: ok
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
           schema:
-            type: string
-      summary: Add a new pet to the store
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Signup endpoint
 securityDefinitions:
   bearerAuth:
     in: header
