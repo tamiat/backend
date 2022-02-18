@@ -26,8 +26,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-	docs.SwaggerInfo_swagger.Title = "Pragmatic Reviews - Video API"
-	docs.SwaggerInfo_swagger.Description = "Pragmatic Reviews - Youtube Video API."
+	docs.SwaggerInfo_swagger.Title = "TAMIAT-CMS"
+	docs.SwaggerInfo_swagger.Description = "Content management system"
 	docs.SwaggerInfo_swagger.Version = "1.0"
 	docs.SwaggerInfo_swagger.Host = "localhost:8080"
 	docs.SwaggerInfo_swagger.BasePath = "/api/v1"

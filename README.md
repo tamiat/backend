@@ -63,7 +63,7 @@ Tamiat CMS backend
    ```  
    C:\Users\<your_username>\go\bin  
    ```  
-- then in the working directory of the project:  
+- then in the working directory of the project:
   ```
   soda migrate
   ```
@@ -74,3 +74,8 @@ We use sendgrid api, so to test this feature you have to:
 - create an account in [sendgrid](https://sendgrid.com/)
 -   create api key
 -  create a template and replace TEMPLATE_ID env variable with your own template id.
+#### Swagger
+Use this url to see swagger page
+```  
+http://localhost:8080/swagger/index.html#/  
+```
