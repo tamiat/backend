@@ -1,9 +1,9 @@
 ---
 development:
   dialect: postgres
-  database: cms
-  user: postgres
-  password: postgres
+  database: {{envOr "DBNAME" ""}}
+  user: {{envOr "USER" ""}}
+  password: {{envOr "PASS" ""}}
   host: 127.0.0.1
   pool: 5
 
