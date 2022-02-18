@@ -5,7 +5,6 @@ import (
 	"github.com/joho/godotenv"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/tamiat/backend/api"
 	"github.com/tamiat/backend/docs"
 	"github.com/tamiat/backend/pkg/domain/contentType"
 	"github.com/tamiat/backend/pkg/domain/role"
@@ -39,14 +38,13 @@ func main() {
 	usertHandler := handlers.UserHandlers{service.NewUserService(user.NewUserRepositoryDb(dbConnection, auth))}
 	roleHandler := handlers.RoleHandlers{service.NewRoleService(role.NewRoleRepositoryDb(sqlDBConnection, auth))}
 	contentTypeHandler := handlers.ContentTypeHandlers{service.NewContentTypeService(contentType.NewContentTypeRepositoryDb(dbConnection, sqlDBConnection, auth))}
-	userAPI := api.NewUserAPI(usertHandler)
 
 	server := gin.New()
 	server.Use(gin.Recovery(), gin.Logger())
 
 	apiRoutes := server.Group("/api/v1")
 	{
-		apiRoutes.POST("/signup", userAPI.SignUpAPI)
+		apiRoutes.POST("/signup", usertHandler.Signup)
 		apiRoutes.POST("/login", usertHandler.Login)
 
 		apiRoutes.POST("/roles", roleHandler.Create)

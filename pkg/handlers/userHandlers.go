@@ -54,7 +54,6 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) {
 	var userObj user.User
 	var signupRequestData Signup
 	//decoding request body
-
 	if err := ctx.ShouldBind(&signupRequestData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -67,6 +66,9 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) {
 	}
 	userObj.Password = string(hash)
 	//database connection
+	userObj.Email = signupRequestData.Email
+	userObj.Password = signupRequestData.Password
+	userObj.Role = signupRequestData.Role
 	userObj.ID, err = receiver.Service.Signup(userObj)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
