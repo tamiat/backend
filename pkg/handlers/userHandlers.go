@@ -46,7 +46,7 @@ type Signup struct {
 // @Param email formData string true "Email"
 // @Param password formData string true "Password"
 // @Param role formData string true "Role"
-// @Success 200 {object} handlers.JWT
+// @Success 200 {object} user.User
 // @Failure 400  {object}  errs.ErrResponse "Bad Request"
 // @Failure 500  {object}  errs.ErrResponse "Internal server error"
 // @Router /signup [post]
@@ -58,6 +58,9 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	userObj.Email = signupRequestData.Email
+	userObj.Password = signupRequestData.Password
+	userObj.Role = signupRequestData.Role
 	//encrypting password
 	hash, err := bcrypt.GenerateFromPassword([]byte(userObj.Password), 10)
 	if err != nil {
@@ -66,9 +69,7 @@ func (receiver UserHandlers) Signup(ctx *gin.Context) {
 	}
 	userObj.Password = string(hash)
 	//database connection
-	userObj.Email = signupRequestData.Email
-	userObj.Password = signupRequestData.Password
-	userObj.Role = signupRequestData.Role
+
 	userObj.ID, err = receiver.Service.Signup(userObj)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -137,7 +138,8 @@ func (receiver UserHandlers) Login(ctx *gin.Context) {
 		return
 	}
 	// authentication process
-	if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginRequestData.Password)); err != nil {
+	password := loginRequestData.Password
+	if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrInvalidPassword.Error()})
 		return
 	}

@@ -46,6 +46,21 @@ definitions:
     required:
     - name
     type: object
+  user.User:
+    properties:
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: integer
+      otp:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -414,7 +429,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.JWT'
+            $ref: '#/definitions/user.User'
         "400":
           description: Bad Request
           schema:
