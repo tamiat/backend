@@ -13,6 +13,7 @@ import (
 	"github.com/tamiat/backend/pkg/handlers"
 	"github.com/tamiat/backend/pkg/middleware"
 	"github.com/tamiat/backend/pkg/service"
+	"os"
 
 	"log"
 )
@@ -26,11 +27,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+	log.Println(os.Getenv("DEV_MODE"))
 	docs.SwaggerInfo_swagger.Title = "TAMIAT-CMS"
 	docs.SwaggerInfo_swagger.Description = "Content management system"
 	docs.SwaggerInfo_swagger.Version = "1.0"
 	docs.SwaggerInfo_swagger.Host = "localhost:8080"
 	docs.SwaggerInfo_swagger.BasePath = "/api/v1"
+
 	docs.SwaggerInfo_swagger.Schemes = []string{"http"}
 
 	dbConnection, sqlDBConnection := driver.GetDbConnection()
@@ -63,7 +66,9 @@ func main() {
 		}
 	}
 
-	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	if os.Getenv("DEV_MODE") == "true" {
+		server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
 
 	server.Run("localhost:8080")
 }

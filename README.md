@@ -3,79 +3,71 @@
 # backend
 Tamiat CMS backend
 
-#### Development instructions
-- You should rename .env.example with .env and put all environment values
-  ex: HOST=localhost.
-- If you want to add a new type of errors, You can add it in [errs package](pkg/errs/errors.go).
+### Instructions applied on linux os
+#### Prerequisites
+- [Golang 1.6 or higher](https://go.dev/doc/install)
+  You may use these steps to install go on your Linux machine or use the previous link to get the latest versions of go.
+    1. Open your terminal and make sure you are at home path
+    2. Download the go package.
+       ```wget https://go.dev/dl/go1.17.7.linux-amd64.tar.gz```
+    3. Extract go files
+       ```sudo tar -C /usr/local -xzf go1.17.7.linux-amd64.tar.gz```
+    4. Add the following line to /home/<your_username/.profile file by using your preferred text editor.
+       ```export PATH=$PATH:/usr/local/go/bin```
+    5. To apply the changes made to .proile file run:
+       ```source $HOME/.profile```
+    6. Make sure you installed go by running:
+       ```go version```
+       You will get output message like this:
+       ```go version go1.17.7 linux/amd64```
+- Postgresql
+  Follow the instructions here: (https://www.postgresql.org/download/)
+
+#### Setting up the project
+1. Clone the repository at any path
+   ```git clone https://github.com/tamiat/backend.git```
+2. ```cd backend```
+3. Create postgresql database and set password for postgres user
+    - ```sudo -i -u postgres```
+    - ```psql```
+    - ``` CREATE DATABASE <database_name>;  ```
+    - ``` ALTER USER postgres WITH PASSWORD '<new_password>';```
+4. type `exit` twice to return to the terminal.
+5. Rename .env.example file to .env
+   ```mv .env.example .env```
+   This file contains all necessarily environment variables.
+
+
+| Environment Variable  | Explanation |
+| ------------- | ------------- |
+| HOST  | ex: localhost  |
+| DBNAME  | database name  |
+| DBPASS  | database password  |
+| DBPORT  | database port, set to 5432  |
+| PORT  | which port number to use for endpoints, ex: 8080  |
+| DBUSER  | database user, ex: postgres  |
+| JWT_SECRET | string to set secret of jwt  |
+| EMAIL_SENDER  | the email that will send confirmation emails to users. It should be activated in sendgrid profile   |
+| TEMPLATE_ID  | which template id sendgrid uses as a format to send emails  |
+| SENDGRID_API_KEY  | api key associated with the sender account |
+
+##### Sendgrid is a thirdparty we use to send emails
+6. Set environment variables using your preferred text editor
+7. Back to backend directory, run:
+   ```go get github.com/gobuffalo/pop/...```
+8. Edit ~/.profile and add this line into it.
+   ```export PATH=$PATH:~/go/bin```
+9. Run the following command to apply changes to .profile
+   ```source ~/.profile```
+10. Run the following command
+    ```which soda```
+    It should give output like this:
+    ```/home/<user_name>/go/bin/soda ```
+11. Now run the following to create all database tables
+    ```soda migrate up```
 
 #### Running instructions
+In the project root directory run
+```go run main.go```
 
-- To test  the endpoints, import the [collection]() in [Postman](https://www.postman.com/), you can check how to import it from [here](https://kb.datamotion.com/?ht_kb=postman-instructions-for-exporting-and-importing).
-- After every  `pull` you can run `soda migrate` to update your local database structure if there are any updates.
-#### Database on local
-1. Create postgresql database  from terminal by doing:
 
-    ```
-     sudo -i -u postgres
-     ```  
-   ```  
-   psql  
-   ```  
-   ```  
-   CREATE DATABSE db_name;  
-    ```
-2. Add datasource to goland (optional, you can use pgadmin4 or dbeaver or you can use postgres from command line)  
-   leave all settings and just add the postgres username as shown in the picture.  
-   ![1](https://user-images.githubusercontent.com/49435053/132143481-3b7f28da-55da-4d48-adca-affa7afb02b8.png)
-
-3. Environment variables:
-   There are 5 environment variables related to database connection</br>
-
-- PASS=< value_for_password_of_postgres_database >
-
-- HOST=localhost </br>
-
-- DBNAME=<db_name> ;  // the same name of database that was created in postgres as shown above</br>
-
-- DBPORT=5432 ; </br>
-
-- PORT=8080 ; </br>
-
-\
-4. Install soda migration tool:
-1. In linux:
-- open .profile
-  ```  
-  nano .profile  
-  ```  
-- add this at the end of the file: <\br>
-  ```
-  export PATH=$HOME/go/bin:$PATH  
-  ```
-  ```  
-  source .profile  
-  ```  
-2. In mac:  
-   same instructions as linux but open .zprofile
-
-3. In windows:  
-   add this environment variable:
-   ```  
-   C:\Users\<your_username>\go\bin  
-   ```  
-- then in the working directory of the project:
-  ```
-  soda migrate
-  ```
-- for more info about soda migration and how it works you can check this [link](https://gobuffalo.io/en/docs/db/toolbox)
-
-#### Send verification code feature
-We use sendgrid api, so to test this feature you have to:
-- create an account in [sendgrid](https://sendgrid.com/)
--   create api key
--  create a template and replace TEMPLATE_ID env variable with your own template id.
-#### Swagger
-Use this url to see swagger page
-```  
-http://localhost:8080/swagger/index.html#/  
-```
