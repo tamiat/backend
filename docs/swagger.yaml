@@ -1,0 +1,481 @@
+definitions:
+  contentType.ContentTypeExample:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      title:
+        type: string
+    type: object
+  errs.ErrResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handlers.ColumnNameExample:
+    properties:
+      name:
+        type: string
+    type: object
+  handlers.ID:
+    properties:
+      table_id:
+        type: string
+    type: object
+  handlers.JWT:
+    properties:
+      token:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  role.Role:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  user.User:
+    properties:
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: integer
+      otp:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /confirmEmail/{id}:
+    post:
+      description: provide user id and otp sent to his email, it consists of 6 characters
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: OTP
+        in: formData
+        name: otp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: pbject
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: verify user email
+  /contentType/{userId}:
+    post:
+      consumes:
+      - application/json
+      description: takes user id as path param to check his role and see if he is
+        authorized to do this action, name is a required attribute
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type body
+        in: body
+        name: contentType
+        required: true
+        schema:
+          $ref: '#/definitions/contentType.ContentTypeExample'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ID'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: Create content type endpoint
+  /contentType/{userId}/{contentTypeId}:
+    delete:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to delete content type
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: delete content type endpoint
+  /contentType/addcol/{userId}/{contentTypeId}:
+    put:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to add new column
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      - description: 'column name : its type'
+        in: body
+        name: columnName
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ColumnNameExample'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: adds column endpoint
+  /contentType/delcol/{userId}/{contentTypeId}:
+    put:
+      description: takes userId and content type Id in path to delete a column
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      - description: Column Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: deletes column endpoint
+  /contentType/renamecol/{userId}/{contentTypeId}:
+    put:
+      consumes:
+      - application/json
+      description: takes userId and content type Id in path to update name of content
+        type column
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Content Type ID
+        in: path
+        name: contentTypeId
+        required: true
+        type: integer
+      - description: 'oldname :  newname'
+        in: body
+        name: columnName
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ColumnNameExample'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: Content type not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: updates column name endpoint
+  /login:
+    post:
+      description: Provide email and password to login, response is JWT
+      parameters:
+      - description: Email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.JWT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorizes
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Login endpoint
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: returns all roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/role.Role'
+            type: array
+        "401":
+          description: ""
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: read roles endpoint
+    post:
+      description: Provide role name to create new role
+      parameters:
+      - description: Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/role.Role'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Create role endpoint
+  /roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: provide role id to delete the role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: ""
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      security:
+      - bearerAuth: []
+      summary: delete a role endpoint
+  /signup:
+    post:
+      description: Provide email and password to login, response is JWT
+      parameters:
+      - description: Email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Role
+        in: formData
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: Signup endpoint
+securityDefinitions:
+  bearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

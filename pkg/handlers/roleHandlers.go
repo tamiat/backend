@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"database/sql"
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 
 	"github.com/tamiat/backend/pkg/domain/role"
 	"github.com/tamiat/backend/pkg/errs"
@@ -15,63 +13,95 @@ import (
 )
 
 type RoleHandlers struct {
-	service service.RoleService
+	Service service.RoleService
 }
 
-func (roleHandler RoleHandlers) Create(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
+//
+// @Summary Create role endpoint
+// @Description Provide role name to create new role
+// @Consume application/x-www-form-urlencoded
+// @Produce application/json
+// @Param name formData string true "Name"
+// @Success 200 {object} role.Role
+// @Failure 500  {object}  errs.ErrResponse "Internal server error"
+// @Failure 400  {object}  errs.ErrResponse "Bad request"
+// @Router /roles [post]
+func (roleHandler RoleHandlers) Create(ctx *gin.Context) {
 	var newRole role.Role
-	_ = json.NewDecoder(r.Body).Decode(&newRole)
-	id, err := roleHandler.service.Create(newRole)
-	//handling errors
+	//decoding request body
+	if err := ctx.ShouldBind(&newRole); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// creating role in db
+	id, err := roleHandler.Service.Create(newRole)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(), http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrDb.Error()})
 		return
 	}
 	newRole.ID = id
 	//sending the response
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(newRole)
+	ctx.JSON(http.StatusOK, newRole)
+
 }
 
-func (roleHandler RoleHandlers) Read(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
+// @Security bearerAuth
+// @Summary read roles endpoint
+// @Description returns all roles
+// @Accept  application/json
+// @Produce  application/json
+// @Success 200 {array} role.Role
+// @Failure 401
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Router /roles [get]
+func (roleHandler RoleHandlers) Read(ctx *gin.Context) {
+	//w.Header().Add("Content-Type", "application/json")
 	var roles []role.Role
-	roles, err := roleHandler.service.Read()
+	roles, err := roleHandler.Service.Read()
 	//handling errors
 	if err == sql.ErrNoRows || len(roles) == 0 {
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoRolesFound.Error(), http.StatusOK))
+		ctx.JSON(http.StatusOK, errs.ErrNoRolesFound)
 		return
 	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, errs.ErrDb)
 		return
 	}
 	//sending the response
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(roles)
+	ctx.JSON(http.StatusOK, roles)
 }
 
-func (roleHandler RoleHandlers) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	params := mux.Vars(r) // Get params
-	id := params["id"]
-	tempId ,err := strconv.Atoi(id)
-	err = roleHandler.service.Delete(tempId)
+// @Security bearerAuth
+// @Summary delete a role endpoint
+// @Description provide role id to delete the role
+// @Accept  application/json
+// @Produce  application/json
+// @Param  id path int true "Role ID"
+// @Success 200 {object} response.Response
+// @Failure 401
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /roles/{id} [delete]
+func (roleHandler RoleHandlers) Delete(ctx *gin.Context) {
+	// read id from path
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errs.ErrParsingID)
+		return
+	}
+	err = roleHandler.Service.Delete(id)
 	//handling errors
 	if err != nil {
 		if err.Error() == `sql: no rows in result set` {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoRowsFound.Error(), http.StatusBadRequest))
+			ctx.JSON(http.StatusBadRequest, errs.ErrNoRolesFound)
+			return
 		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response.NewResponse(errs.ErrDb.Error(), http.StatusInternalServerError))
+			ctx.JSON(http.StatusInternalServerError, errs.ErrDb)
+			return
 		}
-		return
 	}
 	//sending the response
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponse("Role has been deleted successfully", http.StatusOK))
+	var responseObj response.Response
+	responseObj.Message = "Role has been deleted successfully"
+	responseObj.Status = http.StatusOK
+	ctx.JSON(http.StatusOK, responseObj)
 }

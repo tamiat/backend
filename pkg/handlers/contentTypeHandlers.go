@@ -1,37 +1,53 @@
 package handlers
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"github.com/gin-gonic/gin"
+	"github.com/tamiat/backend/pkg/response"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
-	"github.com/gorilla/mux"
-
 	"github.com/tamiat/backend/pkg/errs"
-	"github.com/tamiat/backend/pkg/response"
 	"github.com/tamiat/backend/pkg/service"
 )
 
 type ContentTypeHandlers struct {
-	service service.ContentTypeService
+	Service service.ContentTypeService
+}
+type ID struct {
+	ID string `json:"table_id"`
 }
 
-func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	userId := params["userId"]
-	var newContentType interface{} // The interface where we will save the converted JSON data.
-	buffer, err := ioutil.ReadAll(r.Body)
-	err = r.Body.Close()
-	err = json.Unmarshal(buffer, &newContentType)
-	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
-	// into a map[string]interface{}
+// @Security bearerAuth
+// @Summary Create content type endpoint
+// @Description takes user id as path param to check his role and see if he is authorized to do this action, name is a required attribute
+// @Accept application/json
+// @Produce application/json
+// @Param  userId path int true "User ID"
+// @Param contentType body contentType.ContentTypeExample true "Content Type body"
+// @Success 200 {object} handlers.ID
+// @Failure 500  {object}  errs.ErrResponse "Internal server error"
+// @Failure 400  {object}  errs.ErrResponse "Bad request"
+// @Failure 401  {object}  errs.ErrResponse "Unauthorized error"
+// @Router /contentType/{userId} [post]
+func (ch *ContentTypeHandlers) CreateContentType(ctx *gin.Context) {
+	var newContentType map[string]interface{}
+	err := ctx.ShouldBind(&newContentType)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
 	var name, col string
 	name = ""
-	for key, element := range m {
+	for key, element := range newContentType {
 		if key == "name" {
-			name = strings.TrimSpace(m["name"].(string))
+			name = strings.TrimSpace(newContentType["name"].(string))
 		} else {
 			col += key
 			col += " "
@@ -40,183 +56,262 @@ func (ch *ContentTypeHandlers) createContentType(w http.ResponseWriter, r *http.
 		}
 	}
 	if name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrNoContentTypeName.Error(),http.StatusBadRequest))
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrNoContentTypeName.Error()})
 		return
 	}
 	col = col[0 : len(col)-1]
 	var id string
-	id, err = ch.service.CreateContentType(userId, name, col)
+	id, err = ch.Service.CreateContentType(userId, name, col)
 	if err != nil {
 		if err == errs.ErrUnauthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrUnauthorized.Error()})
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
 		return
 	}
-	type ID struct {
-		ID string `json:"id"`
-	}
+
 	var IDobj ID
 	IDobj.ID = id
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(IDobj)
+	ctx.JSON(http.StatusOK, IDobj)
 	return
 }
 
-func (ch *ContentTypeHandlers) deleteContentType(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	userId := params["userId"]
-	contentTypeId := params["contentTypeId"]
-	err := ch.service.DeleteContentType(userId,contentTypeId)
+// @Security bearerAuth
+// @Summary delete content type endpoint
+// @Description takes userId and content type Id in path to delete content type
+// @Accept  application/json
+// @Produce  application/json
+// @Param  userId path int true "User ID"
+// @Param  contentTypeId path int true "Content Type ID"
+// @Success 200 {object} response.Response
+// @Failure 401 object} errs.ErrResponse "Unauthorized"
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 404 {object} errs.ErrResponse "Content type not found"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /contentType/{userId}/{contentTypeId} [delete]
+func (ch *ContentTypeHandlers) DeleteContentType(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("userId"))
 	if err != nil {
-		if err == errs.ErrContentNotFound {
-			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
-			return
-		} else if err == errs.ErrUnauthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponse("This content has been deleted successfully",http.StatusOK))
-	return
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	err = ch.Service.DeleteContentType(userId, contentTypeId)
+	if err != nil {
+		log.Println(err)
+		if err == errs.ErrContentNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": errs.ErrContentTypeNotFound.Error()})
+			return
+		} else if err == errs.ErrUnauthorized {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrUnauthorized.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
+		return
+	}
+	res := response.Response{
+		Message: "This content has been deleted successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
 }
 
-func (ch *ContentTypeHandlers) updateColName(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	userId := params["userId"]
-	contentTypeId := params["contentTypeId"]
-	var newContentType interface{} // The interface where we will save the converted JSON data.
-	buffer, err := ioutil.ReadAll(r.Body)
-	err = r.Body.Close()
-	err = json.Unmarshal(buffer, &newContentType)
-	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
-	// into a map[string]interface{}
+// @Security bearerAuth
+// @Summary updates column name endpoint
+// @Description takes userId and content type Id in path to update name of content type column
+// @Accept  application/json
+// @Produce  application/json
+// @Param  userId path int true "User ID"
+// @Param  contentTypeId path int true "Content Type ID"
+// @Param columnName body handlers.ColumnNameExample true "oldname :  newname"
+// @Success 200 {object} response.Response
+// @Failure 401 object} errs.ErrResponse "Unauthorized"
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 404 {object} errs.ErrResponse "Content type not found"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /contentType/renamecol/{userId}/{contentTypeId} [put]
+func (ch *ContentTypeHandlers) UpdateColName(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	var newContentType map[string]interface{}
+	err = ctx.ShouldBind(&newContentType)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	i := 0
 	var oldName, newName string
-	for key, element := range m {
+	for key, element := range newContentType {
 		i++
 		oldName = key
 		newName = strings.TrimSpace(element.(string))
 	}
-	if i != 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
+	if i < 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnName.Error()})
 		return
 	}
-	err = ch.service.UpdateColName(userId, contentTypeId, oldName, newName)
+	if i > 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnNameMoreThanOne.Error()})
+		return
+	}
+	err = ch.Service.UpdateColName(userId, contentTypeId, oldName, newName)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
-			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
+			ctx.JSON(http.StatusNotFound, gin.H{"error": errs.ErrColNotFound.Error()})
 			return
 		} else if err == errs.ErrUnauthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": errs.ErrUnauthorized.Error()})
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponse("This column has been renamed successfully",http.StatusOK))
-	return
+	res := response.Response{
+		Message: "This column has been renamed successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
 }
 
-func (ch *ContentTypeHandlers) addCol(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	userId := params["userId"]
-	contentTypeId := params["contentTypeId"]
-	var newContentType interface{} // The interface where we will save the converted JSON data.
-	buffer, err := ioutil.ReadAll(r.Body)
-	err = r.Body.Close()
-	err = json.Unmarshal(buffer, &newContentType)
-	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
-	// into a map[string]interface{}
+// @Security bearerAuth
+// @Summary adds column endpoint
+// @Description takes userId and content type Id in path to add new column
+// @Accept  application/json
+// @Produce  application/json
+// @Param  userId path int true "User ID"
+// @Param  contentTypeId path int true "Content Type ID"
+// @Param columnName body handlers.ColumnNameExample true "column name : its type"
+// @Success 200 {object} response.Response
+// @Failure 401 object} errs.ErrResponse "Unauthorized"
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 404 {object} errs.ErrResponse "Content type not found"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /contentType/addcol/{userId}/{contentTypeId} [put]
+func (ch *ContentTypeHandlers) AddCol(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	var newContentType map[string]interface{}
+	err = ctx.ShouldBind(&newContentType)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	var col string
 	i := 0
-	for key, element := range m {
+	for key, element := range newContentType {
 		i++
 		col += key
 		col += " "
 		col += strings.TrimSpace(element.(string))
 	}
-	if i != 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
+	if i < 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnName.Error()})
 		return
 	}
-	err = ch.service.AddCol(userId, contentTypeId, col)
+	if i > 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrColumnNameMoreThanOne.Error()})
+		return
+	}
+	err = ch.Service.AddCol(userId, contentTypeId, col)
 	if err != nil {
 		if err == errs.ErrContentTypeNotFound {
-			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		} else if err == errs.ErrUnauthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errs.ErrServerErr.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponse("This new column has been added successfully",http.StatusOK))
-	return
+	res := response.Response{
+		Message: "This new column has been added successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
 }
 
-func (ch *ContentTypeHandlers) deleteCol(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	userId := params["userId"]
-	contentTypeId := params["contentTypeId"]
-	var newContentType interface{} // The interface where we will save the converted JSON data.
-	buffer, err := ioutil.ReadAll(r.Body)
-	err = r.Body.Close()
-	err = json.Unmarshal(buffer, &newContentType)
-	m := newContentType.(map[string]interface{}) // To use the converted data we will need to convert it
-	// into a map[string]interface{}
-	var col string
-	i := 0
-	for _, element := range m {
-		i++
-		col += strings.TrimSpace(element.(string))
-	}
-	if i != 1 || m["column name"] != col {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(errs.ErrColumnName.Error(),http.StatusBadRequest))
+// @Security bearerAuth
+// @Summary deletes column endpoint
+// @Description takes userId and content type Id in path to delete a column
+// @Consume application/x-www-form-urlencoded
+// @Produce  application/json
+// @Param  userId path int true "User ID"
+// @Param  contentTypeId path int true "Content Type ID"
+// @Param name formData string true "Column Name"
+// @Success 200 {object} response.Response
+// @Failure 401 object} errs.ErrResponse "Unauthorized"
+// @Failure 500 {object} errs.ErrResponse "Internal server error"
+// @Failure 404 {object} errs.ErrResponse "Content type not found"
+// @Failure 400 {object} errs.ErrResponse "Bad request"
+// @Router /contentType/delcol/{userId}/{contentTypeId} [put]
+func (ch *ContentTypeHandlers) DeleteCol(ctx *gin.Context) {
+
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
 		return
 	}
-	err = ch.service.DeleteCol(userId, contentTypeId, col)
+	contentTypeId := ctx.Param("contentTypeId")
+	_, err = strconv.Atoi(contentTypeId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errs.ErrParsingID.Error()})
+		return
+	}
+	var colNameObj = ColumnName{}
+	err = ctx.ShouldBind(&colNameObj)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Println(colNameObj.ColumnName)
+	err = ch.Service.DeleteCol(userId, contentTypeId, colNameObj.ColumnName)
 	if err != nil {
 		if err == errs.ErrContentNotFound || err == errs.ErrColNotFound {
-			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusNotFound))
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		} else if err == errs.ErrUnauthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusUnauthorized))
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(err.Error(),http.StatusInternalServerError))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponse("This column has been deleted successfully",http.StatusOK))
-	return
+	res := response.Response{
+		Message: "This column has been deleted successfully",
+		Status:  200,
+	}
+	ctx.JSON(http.StatusOK, res)
+}
+
+type ColumnNameExample struct {
+	Name string `json:"name"`
+}
+
+type ColumnName struct {
+	ColumnName string `json:"name" form:"name" binding:"required"`
 }
