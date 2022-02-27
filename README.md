@@ -32,8 +32,13 @@ Tamiat CMS backend
     - ```psql```
     - ``` CREATE DATABASE <database_name>;  ```
     - ``` ALTER USER postgres WITH PASSWORD '<new_password>';```
-4. type `exit` twice to return to the terminal.
-5. Rename .env.example file to .env
+4. (Optional) you can use the following instructions to create the database with a different user:
+   ```sudo -u postgres psql postgres```
+   ```CREATE ROLE <username> LOGIN PASSWORD 'new_password';```
+   ```CREATE DATABASE <database_name> WITH OWNER = <username>```
+   ```SHOW port``` this gives you the **DBPORT**
+5. type `exit` twice to return to the terminal.
+6. At backend directory rename .env.example file to .env
    ```mv .env.example .env```
    This file contains all necessarily environment variables.
 
