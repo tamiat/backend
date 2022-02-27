@@ -64,6 +64,40 @@ definitions:
 info:
   contact: {}
 paths:
+  /confirmEmail/{id}:
+    post:
+      description: provide user id and otp sent to his email, it consists of 6 characters
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: OTP
+        in: formData
+        name: otp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: pbject
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.ErrResponse'
+      summary: verify user email
   /contentType/{userId}:
     post:
       consumes:

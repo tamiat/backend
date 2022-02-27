@@ -49,6 +49,7 @@ func main() {
 	{
 		apiRoutes.POST("/signup", usertHandler.Signup)
 		apiRoutes.POST("/login", usertHandler.Login)
+		apiRoutes.POST("/confirmEmail/:id", usertHandler.VerifyEmail)
 
 		apiRoutes.POST("/roles", roleHandler.Create)
 		rolesRoutes := apiRoutes.Group("/roles", middleware.TokenVerifyMiddleWare())
